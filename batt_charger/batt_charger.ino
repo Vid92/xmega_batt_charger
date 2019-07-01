@@ -19,7 +19,6 @@ double valvoltage = 0;
 double valtemp = 0;
 
 StopWatch controlTime;
-StopWatch SerialTime;
 Control control;
 Program program;
 I2CEEPROM i2c_eeprom(0x50);
@@ -38,28 +37,15 @@ void setup()
 {
   Debug.begin(115200);
   Serial1.begin(115200);
-
+  control.begin();
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LedComms, OUTPUT);
   pinMode(LedRelay, OUTPUT);
 
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(LedComms, LOW);
-
   digitalWrite(LedRelay, LOW);
 
-//new value
-
-/*  unsigned char data[]={0x01};
-
-  int dat = crc16_SingleBuf(data,1);
-
-  int dath = highByte(dat);
-  Debug.println(dath);
-  int datl= lowByte(dat);
-  Debug.println(datl);*/
-
-  control.begin();
   t.every(1000,printMessage); //mostrar valores
 }
 
@@ -85,7 +71,6 @@ void printMessage()
     Debug.print(millis());
     Debug.print(", stopwatch : ");
     Debug.println(controlTime.ms());
-    //Debug.println(valcurrent);
 }
 
 void serialEvent1()
@@ -99,6 +84,5 @@ void serialEvent1()
 
     rcvchar=Serial1.read();    // lo descargo y ...
     comms_addcbuff(rcvchar); // lo añado al buffer y ...
-        //Serial.println(SerialTime.us());
   }
 }

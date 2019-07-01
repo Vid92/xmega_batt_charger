@@ -45,8 +45,6 @@ void comms_inicbuff(void){ // Inicia a 0 cbuff -------------------
 
 int comms_addcbuff(char c){ // Añade a cbuff -----------------------
 
-//Serial.println(c, HEX);
-  //to.update();
   switch(c){
 
     case endchar:           // Enter -> Habilita Flag para procesar
@@ -66,7 +64,6 @@ int comms_addcbuff(char c){ // Añade a cbuff -----------------------
 }
 
 void doTimeout(){
-  //Debug.println("doTimeout");
   to.stop(toID);
   if(!flagbuff){
     Debug.println("ERROR");
@@ -93,7 +90,7 @@ void comms_procesa_comando(void){
 
     if(cbuff[0]==beginchar&&cbuff[xbuff-1]==endchar){
 
-      unsigned char tbuff[lenbuff]={0}; //1024
+      /*unsigned char tbuff[lenbuff]={0}; //1024
 
       int len=0;
       int n=3;
@@ -111,14 +108,11 @@ void comms_procesa_comando(void){
       int crc16_high = highByte(dato);
       int crc16_low = lowByte(dato);
 
-      Debug.println(crc16_low);Debug.println(crc16_high);
-      Debug.println(cbuff[xbuff-3]);Debug.println(cbuff[xbuff-2]);
+      Debug.print(crc16_low);Debug.println(crc16_high);
+      Debug.print(cbuff[xbuff-3]);Debug.println(cbuff[xbuff-2]);
 
-      char lowCrc = (char)crc16_low;
-      char highCrc = (char)crc16_high;
-
-      if((cbuff[xbuff-2]==highCrc)&&(cbuff[xbuff-3]==lowCrc)) //validacion CRC
-      {
+      if(cbuff[xbuff-2]==crc16_high&&cbuff[xbuff-3]==crc16_low) //validacion CRC
+      {*/
           Debug.println("valido ");
 
           if(cbuff[1]==Addfalse&&cbuff[3]==0X03){ //write address
@@ -127,14 +121,14 @@ void comms_procesa_comando(void){
             add[0]=cbuff[2];
             writeAddress(add);
 
-            unsigned char Addfalse2[] = {"ACTION: PASS"};
+            /*unsigned char Addfalse2[] = {"ACTION: PASS"};
 
             int dato = crc16_SingleBuf(Addfalse2,11);
             int crc16_high = highByte(dato);
             int crc16_low = lowByte(dato);
 
-            //Debug.print(crc16_low);Debug.println(crc16_high);
-            digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(Addfalse);Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+            Debug.print(crc16_low);Debug.println(crc16_high);*/
+            digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(Addfalse);Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
             myaddress = add[0];
             goto fin;
           }
@@ -142,16 +136,16 @@ void comms_procesa_comando(void){
           if(cbuff[1]==Addfalse&&cbuff[2]==0X03){  //Read address
             Debug.println("read-address");
             readAddress();
-            unsigned char myaddress2[] = {0};
+            /*unsigned char myaddress2[] = {0};
 
             myaddress2[0]= myaddress;
             int crc16 = crc16_SingleBuf(myaddress2,1);
             int crc16_high = highByte(crc16);
             int crc16_low = lowByte(crc16);
 
-            //Debug.print(crc16_low); Debug.print(crc16_high);
+            Debug.print(crc16_low); Debug.print(crc16_high);*/
 
-            digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(Addfalse); Serial1.write("VALUE: "); Serial1.print(myaddress); Serial1.write(3); Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
+            digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(Addfalse); Serial1.write("VALUE: "); Serial1.print(myaddress); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
             goto fin;
           }
 
@@ -183,21 +177,21 @@ void comms_procesa_comando(void){
                     if(flagpause||flagrun){
                       program.stopStep();
                     }
-                    if(!flagpause&&!flagrun){
+                    {
                       digitalWrite(LedComms, HIGH);Serial1.write(2);Serial1.print(myaddress); Serial1.write(53); Serial1.write("ACTION: FAIL"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
                     }
                   }
 
                   if(cbuff[2]==ampchar){  //show I
 
-                    unsigned char ampchar2[] = {"ACTION: PASS"};
+                    /*unsigned char ampchar2[] = {"ACTION: PASS"};
 
                     int dato = crc16_SingleBuf(ampchar2,11);
                     int crc16_high = highByte(dato);
                     int crc16_low = lowByte(dato);
 
-                    //Debug.print(crc16_low);Debug.println(crc16_high);
-                    digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress); Serial1.write("I"); Serial1.write("VALUE: ");Serial1.print(valcurrent); Serial1.write(3); Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+                    Debug.print(crc16_low);Debug.println(crc16_high);*/
+                    digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress); Serial1.write("I"); Serial1.write("VALUE: ");Serial1.print(valcurrent); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
                   }
 
                   if(cbuff[2]==voltchar){ //show V
@@ -256,15 +250,15 @@ void comms_procesa_comando(void){
               else
               {
                 Debug.println("invalido-Address");
-                Debug.println(cbuff[0], HEX);
+                /*Debug.println(cbuff[0], HEX);
                 Debug.println(cbuff[1], HEX);
-                Debug.println(cbuff[xbuff-1], HEX);
+                Debug.println(cbuff[xbuff-1], HEX);*/
               }
-      }
+      /*}
       else
       {
         Debug.println("invalido");
-      }
+      }*/
 
       fin:
       if(!flagbuff)comms_inicbuff(); // Borro buffer.

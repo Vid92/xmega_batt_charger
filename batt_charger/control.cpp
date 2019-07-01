@@ -18,8 +18,7 @@ void Control::run() {
   this->state = 1;
 
   digitalWrite(LedRelay, HIGH);
-  //Debug.println("Relay-on");
-  if((this->prevstate == 0 || this->prevstate == 3 || this->prevstate == 4) && this->state == 1){
+  if((this->prevstate == 0 || this->prevstate == 3 || this->prevstate == 4 || this->prevstate == 1) && this->state == 1){
     controlTime.start();
   }
 }
@@ -46,7 +45,16 @@ void Control::runPause(){
   valvoltage = 0;
   valtemp = 0;
 
-  if((this->prevstate == 0 || this->prevstate == 3) && this->state == 4){
+  while(this->valrampa > 0)
+  {
+    this->valrampa--;
+    dac.write(0xFFF-this->valrampa);
+    delay(1);
+  }
+
+  digitalWrite(LedRelay, LOW);
+
+  if((this->prevstate == 0 || this->prevstate == 3 || this->prevstate == 1) && this->state == 4){
     controlTime.start();
   }
 }
@@ -64,30 +72,26 @@ void Control::event() {
       {
         if(controlTime.ms() < this->timeout)
         {
-          long averageCurrent = 0;
-          long averageVoltage = 0;
-          long averageTemp  = 0;
+          this->averageCurrent = 0;
+          this->averageVoltage = 0;
+          this->averageTemp  = 0;
 
           for(int i = 0; i < 40; i++)
           {
-            averageCurrent = averageCurrent + analogRead(A0);
-            averageVoltage = averageVoltage + analogRead(A1);
-            averageTemp = averageTemp + analogRead(A2);
+            this->averageCurrent = this->averageCurrent + analogRead(A0);
+            this->averageVoltage = this->averageVoltage + analogRead(A1);
+            this->averageTemp = this->averageTemp + analogRead(A2);
           }
-          averageCurrent = averageCurrent / 40;
-          averageVoltage = averageVoltage / 40;
-          averageTemp = averageTemp / 40;
+          this->averageCurrent = this->averageCurrent / 40;
+          this->averageVoltage = this->averageVoltage / 40;
+          this->averageTemp = this->averageTemp / 40;
 
-          valcurrent = averageCurrent * 35.0 / 1023.0; //35 shunt
-          valvoltage = averageVoltage * 500.0 / 1023.0;
-          valtemp = averageTemp * 80.0 / 1023.0;
+          valcurrent = this->averageCurrent * 35.0 / 1023.0;
+          valvoltage = this->averageVoltage * 500.0 / 1023.0;
+          valtemp = this->averageTemp * 80.0 / 1023.0;
           //Serial.println(valcurrent);
           //Serial.println(valvoltage);
           //Serial.println(valtemp);
-
-          //current0 = this->valcurrent;
-          //voltage0 = this->valvoltage;
-          //temperature0 = this->valtemp;
 
           if(valcurrent < this->val_control)
           {
@@ -106,28 +110,25 @@ void Control::event() {
         else
         {
           Debug.println("timeout-agotado");
-          this->state = 3;
+          controlTime.stop();
           flagStep=true;
-          //Debug.print("Relay-off");
-          digitalWrite(LedRelay, LOW);
         }
       }
   }
 
   if(this->state == 4)
   {
-    dac.write(0xFFF);
-    if(controlTime.isRunning()){
-
-      if(controlTime.ms() < this->steptime){
-      }
-      else
+    if(controlTime.isRunning())
+    {
+      if(controlTime.ms() > this->steptime)
       {
+        //Debug.print("controlTime: "); Debug.println(controlTime.ms());
         Debug.println("stepPause out");
-        this->state = 3;
+        //this->state = 3;
         flagStep=true;
       }
     }
+      delay(1);
   }
 
   if(this->prevstate!=3 && this->state == 3)
@@ -140,8 +141,7 @@ void Control::event() {
       dac.write(0xFFF-this->valrampa);
       delay(1);
     }
-      //Debug.print("Relay-offS");
-      digitalWrite(LedRelay, LOW);
+    digitalWrite(LedRelay, LOW);
   }
 
   if(this->prevstate!= 2 && this->state == 2)
@@ -154,8 +154,6 @@ void Control::event() {
         dac.write(0xFFF-this->valrampa);
         delay(1);
       }
-      //Debug.print("Relay-offP");
-      digitalWrite(LedRelay, LOW);
   }
   if(this->prevstate == 2 && (this->state == 1 || this->state == 4))
   {

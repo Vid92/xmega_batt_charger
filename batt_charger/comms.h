@@ -5,7 +5,7 @@
 #include "program.h"
 #include "Timer.h"
 #include "globals.h"
-#include "crc.h"
+//#include "crc.h"
 
 extern char rcvchar;
 extern bool flagcommand;

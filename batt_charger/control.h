@@ -24,6 +24,9 @@ class Control
   int state = 0; // 1 = running, 2 = pause, 3 = stop
   int prevstate = 0;
   int valrampa = 0;
+  long averageCurrent = 0;
+  long averageVoltage = 0;
+  long averageTemp  = 0;
 
 //  double valcurrent = 0;
 //  double valvoltage = 0;
@@ -41,11 +44,6 @@ class Control
   void pause();
   void stop();
   void event();
-
-  void showCurrent();
-  void showVoltage();
-  void showTemperature();
-  //void eventPause();
 };
 
 #endif

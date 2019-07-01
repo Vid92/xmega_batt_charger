@@ -30,7 +30,7 @@ char* eepromread(){
   char temp[1024];
   memset(temp,0,sizeof(temp));
 
-  unsigned char temp2[1024] = {0};
+  //unsigned char temp2[1024] = {0};
   int len = 0;
   for(int i = 0; i<1024;i++){
     //int val = EEPROM.read(i+1);//lee posicion
@@ -45,16 +45,16 @@ char* eepromread(){
 
     flagload = true;
 
-    //Debug.print(len);
+    /*Debug.print(len);
     temp2[len]= temp[len];
 
     int crc16 = crc16_SingleBuf(temp2,len);
     int crc16_high = highByte(crc16);
     int crc16_low = lowByte(crc16);
 
-    //Debug.print(crc16_low); Debug.print(crc16_high);
+    Debug.print(crc16_low); Debug.print(crc16_high);*/
 
-    digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.print("R"); Serial1.write("VALUE: "); Serial1.print(temp); Serial1.write(3); Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+    digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.print("R"); Serial1.write("VALUE: "); Serial1.print(temp); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
 
     /*for(int i=0;i<512;i++){
       Serial.print("a[");
