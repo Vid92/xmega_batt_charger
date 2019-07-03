@@ -111,9 +111,13 @@ void comms_procesa_comando(void){
       Debug.print(crc16_low);Debug.println(crc16_high);
       Debug.print(cbuff[xbuff-3]);Debug.println(cbuff[xbuff-2]);
 
-      if(cbuff[xbuff-2]==crc16_high&&cbuff[xbuff-3]==crc16_low) //validacion CRC
+      char lowCrc = (char)crc16_low;
+      char highCrc = (char)crc16_high;*/
+
+/*      if(cbuff[xbuff-2]==lowCrc&&cbuff[xbuff-3]==highCrc) //validacion CRC
       {*/
           Debug.println("valido ");
+
 
           if(cbuff[1]==Addfalse&&cbuff[3]==0X03){ //write address
             Debug.println("writte-address");
@@ -146,6 +150,7 @@ void comms_procesa_comando(void){
             Debug.print(crc16_low); Debug.print(crc16_high);*/
 
             digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(Addfalse); Serial1.write("VALUE: "); Serial1.print(myaddress); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
+            flagcomms=true;
             goto fin;
           }
 
@@ -254,12 +259,12 @@ void comms_procesa_comando(void){
                 Debug.println(cbuff[1], HEX);
                 Debug.println(cbuff[xbuff-1], HEX);*/
               }
-      /*}
+    /*  }
       else
       {
         Debug.println("invalido");
-      }*/
-
+      }
+*/
       fin:
       if(!flagbuff)comms_inicbuff(); // Borro buffer.
       Debug.println("Procesado"); // Monitorizo procesado.

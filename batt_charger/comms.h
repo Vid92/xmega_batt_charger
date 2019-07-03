@@ -5,10 +5,11 @@
 #include "program.h"
 #include "Timer.h"
 #include "globals.h"
-//#include "crc.h"
+#include "crc.h"
 
 extern char rcvchar;
 extern bool flagcommand;
+extern bool flagcomms;
 extern bool flagbuff;
 extern bool flagtime;
 //extern Control control;

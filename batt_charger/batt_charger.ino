@@ -7,6 +7,7 @@
 
 char rcvchar=0x00;   // último carácter recibido
 bool flagcommand=false;
+bool flagcomms=false;
 bool flagbuff = false;
 bool flagStep=false;
 bool flagtime=true;
@@ -27,6 +28,8 @@ Timer t;
 Timer to;
 int LedComms = 17;
 int LedRelay = 20;
+int LedShow = 21;
+
 
 char anbu[1024];  //cfg json
 char type[15][20]; //inicio, pausa,carga, fin
@@ -41,17 +44,21 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LedComms, OUTPUT);
   pinMode(LedRelay, OUTPUT);
+  pinMode(LedShow, OUTPUT);
 
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(LedComms, LOW);
   digitalWrite(LedRelay, LOW);
+  digitalWrite(LedShow, LOW);
 
   t.every(1000,printMessage); //mostrar valores
+  t.every(500,LedToggle);
 }
 
 void loop()
 {
   if(flagcommand) comms_procesa_comando();
+
   t.update();
   to.update();
 
@@ -73,9 +80,18 @@ void printMessage()
     Debug.println(controlTime.ms());
 }
 
+void LedToggle()
+{
+  if(flagcomms){
+    for(int i=0;i<6;i++){
+      PORTD.OUTTGL=PIN1_bm;
+      delay(1);
+    }
+  }
+}
+
 void serialEvent1()
 {    // Interrupción recepción serie USART
-
     flagbuff = false;
     rcvchar=0x00;        // Inicializo carácter recibido
     Debug.println("EventoSerial");
