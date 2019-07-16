@@ -2,7 +2,8 @@
 #include <Arduino.h>
 
 void writeAddress(char* add){
-  i2c_eeprom.write(0,add[0]);
+  //i2c_eeprom.write(0,add[0]);
+  writeEEPROM(disk1,0,add[0]);
   //EEPROM.write(0,add[0]);
 }
 
@@ -10,7 +11,8 @@ char* readAddress(){
     char addR[0];
     memset(addR,0,sizeof(addR));
 
-    int value = i2c_eeprom.read(0);
+    //int value = i2c_eeprom.read(0);
+    int value = readEEPROM(disk1,0);
     //int val = EEPROM.read(0);
     myaddress = value;
 }
@@ -21,7 +23,8 @@ void eepromsave(char* tmp){ //comparacion CR1 CR2 enviado
       break;
     }*/
     //EEPROM.write(i+1,tmp[i]);
-    i2c_eeprom.write(i+1,tmp[i]);
+    //i2c_eeprom.write(i+1,tmp[i]);
+    writeEEPROM(disk1,i+1,tmp[i]);
   }
   Debug.print(tmp);
 }
@@ -34,7 +37,8 @@ char* eepromread(){
   int len = 0;
   for(int i = 0; i<1024;i++){
     //int val = EEPROM.read(i+1);//lee posicion
-    int val = i2c_eeprom.read(i+1);
+    //int val = i2c_eeprom.read(i+1);
+    int val = readEEPROM(disk1,i+1);
     if(val== 0xFF || val == 0){
       break;
     }
@@ -42,19 +46,20 @@ char* eepromread(){
     len++;
     //Debug.print(temp);
   }
+    //Debug.print(temp);
 
     flagload = true;
 
-    /*Debug.print(len);
-    temp2[len]= temp[len];
+    //Debug.print(len);
+    /*temp2[len]= temp[len];
 
     int crc16 = crc16_SingleBuf(temp2,len);
     int crc16_high = highByte(crc16);
-    int crc16_low = lowByte(crc16);
+    int crc16_low = lowByte(crc16);*/
 
-    Debug.print(crc16_low); Debug.print(crc16_high);*/
+    //Debug.print(crc16_low); Debug.print(crc16_high);
 
-    digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.print("R"); Serial1.write("VALUE: "); Serial1.print(temp); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+    if(flagpause){digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write("VALUE: "); Serial1.print("R"); Serial1.print(temp); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);}
 
     /*for(int i=0;i<512;i++){
       Serial.print("a[");

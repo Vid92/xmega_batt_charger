@@ -1,9 +1,12 @@
 #include "comms.h"
 #include "xmDAC.h"
-//#include "StopWatch.h"
 #include "Timer.h"
 #include "globals.h"
 
+int disk1 = 0x50;    //Address of 24LC256 eeprom chip
+int disk2 = 0x57;    //Address of 24LC256 eeprom chip extern
+
+unsigned int address = 0;
 
 char rcvchar=0x00;   // último carácter recibido
 bool flagcommand=false;
@@ -22,13 +25,12 @@ double valtemp = 0;
 StopWatch controlTime;
 Control control;
 Program program;
-I2CEEPROM i2c_eeprom(0x50);
+//I2CEEPROM i2c_eeprom(0x50);
 
 Timer t;
 Timer to;
 int LedComms = 17;
 int LedRelay = 20;
-int LedShow = 21;
 
 
 char anbu[1024];  //cfg json
@@ -40,29 +42,39 @@ void setup()
 {
   Debug.begin(115200);
   Serial1.begin(115200);
+  Wire.begin();
   control.begin();
+
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LedComms, OUTPUT);
   pinMode(LedRelay, OUTPUT);
-  pinMode(LedShow, OUTPUT);
 
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(LedComms, LOW);
   digitalWrite(LedRelay, LOW);
-  digitalWrite(LedShow, LOW);
+
+  myaddress = readEEPROM(disk2, address);
+  //Debug.println(myaddress,DEC);
+  //delay(1);
+
+  writeEEPROM(disk1, address,myaddress);
+  //Debug.println(readEEPROM(disk1, address), DEC);
+
+  clearProgram();
+  loadProgram();
 
   t.every(1000,printMessage); //mostrar valores
-  t.every(500,LedToggle);
 }
 
 void loop()
 {
-  if(flagcommand) comms_procesa_comando();
+  if(flagcommand)comms_procesa_comando();
 
   t.update();
   to.update();
 
   program.process_step();
+
   control.event();
 
   if(flagStep)
@@ -78,16 +90,6 @@ void printMessage()
     Debug.print(millis());
     Debug.print(", stopwatch : ");
     Debug.println(controlTime.ms());
-}
-
-void LedToggle()
-{
-  if(flagcomms){
-    for(int i=0;i<6;i++){
-      PORTD.OUTTGL=PIN1_bm;
-      delay(1);
-    }
-  }
 }
 
 void serialEvent1()

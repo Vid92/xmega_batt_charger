@@ -16,9 +16,6 @@ extern bool flagtime;
 extern Program program;
 extern Timer to;
 
-
-
-//void doTimeout(void);
 void comms_inicbuff(void);        // Borra buffer
 int comms_addcbuff(char c);       // añade carácter recibido al buffer
 void comms_procesa_comando(void); // Procesa comando

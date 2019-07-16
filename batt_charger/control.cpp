@@ -89,6 +89,15 @@ void Control::event() {
           valcurrent = this->averageCurrent * 35.0 / 1023.0;
           valvoltage = this->averageVoltage * 500.0 / 1023.0;
           valtemp = this->averageTemp * 80.0 / 1023.0;
+
+          /*PORTD.OUTTGL=PIN1_bm;
+          Debug.print("v1,");
+          Debug.print(valcurrent);
+          Debug.print("v2,");
+          Debug.print(valvoltage);
+          Debug.print("v3,");
+          Debug.print(valtemp);*/
+
           //Serial.println(valcurrent);
           //Serial.println(valvoltage);
           //Serial.println(valtemp);
@@ -154,10 +163,13 @@ void Control::event() {
         dac.write(0xFFF-this->valrampa);
         delay(1);
       }
+      digitalWrite(LedRelay, LOW);
   }
   if(this->prevstate == 2 && (this->state == 1 || this->state == 4))
   {
     controlTime.play();
+    if(this->state==4)digitalWrite(LedRelay, LOW);
+    if(this->state==1)digitalWrite(LedRelay, HIGH);
   }
 
   this->prevstate = this->state;
