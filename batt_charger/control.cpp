@@ -25,17 +25,11 @@ void Control::run() {
 
 void Control::pause() {
   this->state = 2;
-  valcurrent = 0;
-  valvoltage = 0;
-  valtemp = 0;
 }
 
 void Control::stop() {
   this->state = 3;
   digitalWrite(LED_BUILTIN, LOW);
-  valcurrent = 0;
-  valvoltage = 0;
-  valtemp = 0;
 }
 
 void Control::runPause(){
@@ -63,16 +57,42 @@ void Control::stepPause(unsigned long steptime){
   this->steptime = steptime;
 }
 
+
+void Control::readData(){
+  this->averageCurrent = 0;
+  this->averageVoltage = 0;
+  this->averageTemp  = 0;
+
+  for(int i = 0; i < 40; i++)
+  {
+    this->averageCurrent = this->averageCurrent + analogRead(A0);
+    this->averageVoltage = this->averageVoltage + analogRead(A1);
+    this->averageTemp = this->averageTemp + analogRead(A2);
+  }
+  this->averageCurrent = this->averageCurrent / 40;
+  this->averageVoltage = this->averageVoltage / 40;
+  this->averageTemp = this->averageTemp / 40;
+
+  this->valcurrent0 = this->averageCurrent - 36.0;
+  valcurrent = this->valcurrent0 * 35.0 / 1023.0;
+
+  //Debug.println(this->averageVoltage);
+  this->valvoltage0 = this->averageVoltage - 44.0;
+  valvoltage = this->valvoltage0 * 500.0 / 1023.0;
+
+  //Debug.println(this->valvoltage0);
+  valtemp = this->averageTemp * 120.0 / 1023.0;
+}
+
 void Control::event() {
   //here your logic to control the current
-
   if(this->state == 1)
   {
       if(controlTime.isRunning())
       {
         if(controlTime.ms() < this->timeout)
         {
-          this->averageCurrent = 0;
+          /*this->averageCurrent = 0;
           this->averageVoltage = 0;
           this->averageTemp  = 0;
 

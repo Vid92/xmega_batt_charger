@@ -10,7 +10,6 @@ unsigned int address = 0;
 
 char rcvchar=0x00;   // último carácter recibido
 bool flagcommand=false;
-bool flagcomms=false;
 bool flagbuff = false;
 bool flagStep=false;
 bool flagtime=true;
@@ -31,7 +30,6 @@ Timer t;
 Timer to;
 int LedComms = 17;
 int LedRelay = 20;
-
 
 char anbu[1024];  //cfg json
 char type[15][20]; //inicio, pausa,carga, fin
@@ -54,11 +52,8 @@ void setup()
   digitalWrite(LedRelay, LOW);
 
   myaddress = readEEPROM(disk2, address);
-  //Debug.println(myaddress,DEC);
-  //delay(1);
 
   writeEEPROM(disk1, address,myaddress);
-  //Debug.println(readEEPROM(disk1, address), DEC);
 
   clearProgram();
   loadProgram();
@@ -73,8 +68,8 @@ void loop()
   t.update();
   to.update();
 
+  control.readData();
   program.process_step();
-
   control.event();
 
   if(flagStep)

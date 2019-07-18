@@ -28,9 +28,9 @@ class Control
   long averageVoltage = 0;
   long averageTemp  = 0;
 
-//  double valcurrent = 0;
-//  double valvoltage = 0;
-//  double valtemp = 0;
+  double valcurrent0 = 0;
+  double valvoltage0 = 0;
+  double valtemp0 = 0;
   //StopWatch controlTime;
 
 //  long averageTemp = 0;
@@ -44,6 +44,7 @@ class Control
   void pause();
   void stop();
   void event();
+  void readData();
 };
 
 #endif
