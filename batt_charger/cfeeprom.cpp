@@ -97,10 +97,14 @@ char* eepromread(){
       }
       unsigned long time = root[i]["Time"];
       float current0 = root[i]["Current"];
+      float temperature1 = root[i]["Maxtemp"];
+      float temperature2 = root[i]["Mintemp"];
 
       strcpy(type[i],type0);
       duration[i]=time;
       current[i]=current0;
+      maxtemp[i]=temperature1;
+      mintemp[i]=temperature2;
     }
 }
 
@@ -111,6 +115,8 @@ void clearProgram(){
   for(int i=0; i< 15;i++){
     duration[i]=0;
     current[i]=0;
+    maxtemp[i]=0;
+    mintemp[i]=0;
   }
 }
 

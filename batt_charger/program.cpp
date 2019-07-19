@@ -49,6 +49,7 @@ void Program::process_step()
       Debug.println("Step-Charge");
       control.setTime(duration[count]);
       control.setCurrent(current[count]);
+      control.setTemperature(maxtemp[count],mintemp[count]);
       control.run();
       break;
 

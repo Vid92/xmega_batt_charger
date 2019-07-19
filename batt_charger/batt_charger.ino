@@ -35,6 +35,8 @@ char anbu[1024];  //cfg json
 char type[15][20]; //inicio, pausa,carga, fin
 unsigned long duration[15]; //time
 float current[15];
+float maxtemp[15];
+float mintemp[15];
 
 void setup()
 {

@@ -14,6 +14,11 @@ void Control::setTime(unsigned long timeout) {
   this->timeout = timeout;
 }
 
+void Control::setTemperature(float maxTemp,float minTemp){
+  this->maxTemp = maxTemp;
+  this->minTemp = minTemp;
+}
+
 void Control::run() {
   this->state = 1;
 
@@ -106,7 +111,13 @@ void Control::event() {
           this->averageVoltage = this->averageVoltage / 40;
           this->averageTemp = this->averageTemp / 40;
 
-          valcurrent = this->averageCurrent * 35.0 / 1023.0;
+          this->valcurrent0 = this->averageCurrent - 36.0;
+          valcurrent = this->valcurrent0 * 35.0 / 1023.0;
+          //valcurrent = this->averageCurrent * 35.0 / 1023.0;
+
+          //this->valvoltage0 = this->averageVoltage - 44.0;
+          //valvoltage = this->valvoltage0 * 500.0 / 1023.0;
+
           valvoltage = this->averageVoltage * 500.0 / 1023.0;
           valtemp = this->averageTemp * 80.0 / 1023.0;
 
@@ -121,6 +132,10 @@ void Control::event() {
           //Serial.println(valcurrent);
           //Serial.println(valvoltage);
           //Serial.println(valtemp);
+
+          if(valtemp > this->maxTemp){ //se va a pause
+            this->state=2; Debug.println("Pause-temp");
+          }
 
           if(valcurrent < this->val_control)
           {
@@ -173,18 +188,29 @@ void Control::event() {
     digitalWrite(LedRelay, LOW);
   }
 
-  if(this->prevstate!= 2 && this->state == 2)
+  //if((this->prevstate!= 2 || this->prevstate == 2)&&this->state == 2)
+  if(this->prevstate!= 2 &&this->state == 2)
   {
      Debug.println("PAUSE");
      controlTime.pause();
       while(this->valrampa > 0)
+      //if(this->valrampa > 0)
       {
         this->valrampa--;
         dac.write(0xFFF-this->valrampa);
         delay(1);
       }
-      digitalWrite(LedRelay, LOW);
+      //if(this->valrampa==0)
+      digitalWrite(LedRelay, LOW); //solo digitalWrite
   }
+
+  if(this->prevstate == 2 &&this->state == 2){
+    if(valtemp <= minTemp){
+      this->state = 1;
+      Debug.println("good-temp");
+    }    
+  }
+
   if(this->prevstate == 2 && (this->state == 1 || this->state == 4))
   {
     controlTime.play();

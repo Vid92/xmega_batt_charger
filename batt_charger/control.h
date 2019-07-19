@@ -19,6 +19,8 @@ class Control
 
   xmDAC dac=xmDAC(xmDAC::DAC_PORT_B);
   float val_control = 0;
+  float maxTemp = 0;
+  float minTemp = 0;
   unsigned long timeout = 0;
   unsigned long steptime = 0;
   int state = 0; // 1 = running, 2 = pause, 3 = stop
@@ -37,6 +39,7 @@ class Control
 
   void begin();
   void setCurrent(float val_control);
+  void setTemperature(float maxTemp,float minTemp);
   void setTime(unsigned long timeout);
   void stepPause(unsigned long steptime);
   void run();

@@ -106,7 +106,7 @@ void comms_procesa_comando(void){
               }
               else
               {
-                digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(51); Serial1.write("ACTION: FAIL"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+                digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(51); Serial1.write("ACTION: FAIL"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
               }
           }
 
@@ -178,28 +178,28 @@ void comms_procesa_comando(void){
             {
               Debug.println("valido crc");*/
               if(cbuff[3]==0x5B){
-                int i=3;
-                char tmp[lenbuff]={0};
+                  int i=3;
+                  char tmp[lenbuff]={0};
 
-                do{ // Extraemos argumento del buffer
-                  tmp[i-3]=cbuff[i]; // a partir del 3er byte y hasta 0.
-                  //Debug.print(tmp[i-3]);
-                  //Debug.println(i);
-                }while(cbuff[++i]!=0x03);
-                //Debug.print(tmp);
-                Debug.println("writingEEPROM");
-                //clearProgram();
-                eepromsave(tmp);
-                flagload = false;
+                  do{ // Extraemos argumento del buffer
+                    tmp[i-3]=cbuff[i]; // a partir del 3er byte y hasta 0.
+                    //Debug.print(tmp[i-3]);
+                    //Debug.println(i);
+                  }while(cbuff[++i]!=0x03);
+                  //Debug.print(tmp);
+                  Debug.println("writingEEPROM");
+                  //clearProgram();
+                  eepromsave(tmp);
+                  flagload = false;
 
-                digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
-                clearProgram();
-                loadProgram();
-                Debug.println("cargo");
+                  digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
+                  clearProgram();
+                  loadProgram();
+                  Debug.println("cargo");
               }
               else
               {
-                digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: FAIL"); Serial1.write(3);Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2);digitalWrite(LedComms, LOW);
+                digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: FAIL"); Serial1.write(3);Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
               }
 
             /*}
