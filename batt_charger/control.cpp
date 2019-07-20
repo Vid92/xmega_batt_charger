@@ -6,12 +6,16 @@ void Control::begin(){
   dac.write(0xFFF);
 }
 
-void Control::setCurrent(float val_control) {
+void Control::setCurrent(float val_control){
   this->val_control = val_control;
 }
 
-void Control::setTime(unsigned long timeout) {
+void Control::setTime(unsigned long timeout){
   this->timeout = timeout;
+}
+
+void Control::setAmpHour(float valAmpHour){
+  this->valAmpHour = valAmpHour;
 }
 
 void Control::setTemperature(float maxTemp,float minTemp){
@@ -97,59 +101,23 @@ void Control::event() {
       {
         if(controlTime.ms() < this->timeout)
         {
-          /*this->averageCurrent = 0;
-          this->averageVoltage = 0;
-          this->averageTemp  = 0;
+            if(valtemp > this->maxTemp){ //se va a pause
+              this->state=2; Debug.println("Pause-temp");
+            }
 
-          for(int i = 0; i < 40; i++)
-          {
-            this->averageCurrent = this->averageCurrent + analogRead(A0);
-            this->averageVoltage = this->averageVoltage + analogRead(A1);
-            this->averageTemp = this->averageTemp + analogRead(A2);
-          }
-          this->averageCurrent = this->averageCurrent / 40;
-          this->averageVoltage = this->averageVoltage / 40;
-          this->averageTemp = this->averageTemp / 40;
+            if(valcurrent < this->val_control)
+            {
+              if (this->valrampa<0xFFF)
+                this->valrampa++;
+            }
 
-          this->valcurrent0 = this->averageCurrent - 36.0;
-          valcurrent = this->valcurrent0 * 35.0 / 1023.0;
-          //valcurrent = this->averageCurrent * 35.0 / 1023.0;
-
-          //this->valvoltage0 = this->averageVoltage - 44.0;
-          //valvoltage = this->valvoltage0 * 500.0 / 1023.0;
-
-          valvoltage = this->averageVoltage * 500.0 / 1023.0;
-          valtemp = this->averageTemp * 80.0 / 1023.0;
-
-          /*PORTD.OUTTGL=PIN1_bm;
-          Debug.print("v1,");
-          Debug.print(valcurrent);
-          Debug.print("v2,");
-          Debug.print(valvoltage);
-          Debug.print("v3,");
-          Debug.print(valtemp);*/
-
-          //Serial.println(valcurrent);
-          //Serial.println(valvoltage);
-          //Serial.println(valtemp);
-
-          if(valtemp > this->maxTemp){ //se va a pause
-            this->state=2; Debug.println("Pause-temp");
-          }
-
-          if(valcurrent < this->val_control)
-          {
-            if (this->valrampa<0xFFF)
-              this->valrampa++;
-          }
-
-          if(valcurrent > this->val_control)
-          {
-            if(this->valrampa > 0)
-              this->valrampa--;
-          }
-          dac.write(0xFFF-this->valrampa);
-          delay(1);
+            if(valcurrent > this->val_control)
+            {
+              if(this->valrampa > 0)
+                this->valrampa--;
+            }
+            dac.write(0xFFF-this->valrampa);
+            delay(1);
         }
         else
         {
@@ -159,6 +127,17 @@ void Control::event() {
         }
       }
   }
+
+
+  /*
+
+    if(this->valAmpHour0 < this->valAmpHour){
+      //hace control
+
+    }
+
+
+  */
 
   if(this->state == 4)
   {
@@ -208,7 +187,7 @@ void Control::event() {
     if(valtemp <= minTemp){
       this->state = 1;
       Debug.println("good-temp");
-    }    
+    }
   }
 
   if(this->prevstate == 2 && (this->state == 1 || this->state == 4))

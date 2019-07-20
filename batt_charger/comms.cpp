@@ -90,93 +90,100 @@ void comms_procesa_comando(void){
 
     if(cbuff[0]==beginchar&&cbuff[xbuff-1]==endchar){
 
-      if(cbuff[1]==myaddress) //address
+      unsigned char tbuff[lenbuff]={0}; //1024
+
+      char crc16_high;
+      char crc16_low;
+      int len=0;
+      int n=3;
+      //if(cbuff[1]==Addfalse){n=2;}
+      for(int x=n;; x++){
+        if(cbuff[x]==0x03)break;
+
+        tbuff[x-n]=cbuff[x]; // a partir del 3er byte y hasta 0.
+        len++;
+      }
+      Debug.print("len: ");
+      Debug.println(len);
+      Debug.print("msg: ");
+        for(int i=0;i<len;i++){
+          Debug.print(tbuff[i],HEX);
+
+        }
+
+        int dato = crc16_SingleBuf(tbuff,len);
+        crc16_high = highByte(dato);
+        crc16_low = lowByte(dato);
+
+      if(cbuff[xbuff-3]==crc16_low&&cbuff[xbuff-2]==crc16_high) //validacion CRC
       {
-          Debug.println("valido address");
+        Debug.println("valido crc");
+        if(cbuff[1]==myaddress) //address
+        {
+            Debug.println("valido address");
 
-          if(cbuff[2]==Ping){
-            Debug.println("PING");
-            digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
-          }
-
-          if(cbuff[2]==runchar){  //run
-              if(flagload){
-                flagrun = true; flagpause = false;
-                program.runStep();
-              }
-              else
-              {
-                digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(51); Serial1.write("ACTION: FAIL"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
-              }
-          }
-
-          if(cbuff[2]==pausechar){  //pause
-              if(flagrun){
-                flagpause = true; flagrun=false;
-                program.pauseStep();
-              }
-              else
-              {
-                digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(52); Serial1.write("ACTION: FAIL"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
-              }
-          }
-
-          if(cbuff[2]==stopchar){ //stop
-              if(flagpause||flagrun){
-                program.stopStep();
-              }
-              if(!flagpause&&!flagrun)
-              {
-                digitalWrite(LedComms, HIGH);Serial1.write(2);Serial1.print(myaddress); Serial1.write(53); Serial1.write("ACTION: FAIL"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
-              }
-          }
-
-          if(cbuff[2]==combchar){  //show I,V,T
-              digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);  Serial1.write("VALUE: ");Serial1.write("I");Serial1.print(valcurrent); Serial1.write(","); Serial1.write("V"); Serial1.print(valvoltage);Serial1.write(","); Serial1.write("T"); Serial1.print(valtemp); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
-          }
-
-          /*if(cbuff[2]==ampchar){  //show I
-            digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress); Serial1.write("I"); Serial1.write("VALUE: ");Serial1.print(valcurrent); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
-          }
-
-          if(cbuff[2]==voltchar){ //show V
-            digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);Serial1.write("V");Serial1.write("VALUE: ");Serial1.print(valvoltage); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
-          }
-          if(cbuff[2]==tempchar){ //show T
-            digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write("T");Serial1.write("VALUE: ");Serial1.print(valtemp); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
-          }*/
-
-          if(cbuff[2]==stepchar){ //current step
-            digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);Serial1.write("P");Serial1.write("VALUE: ");Serial1.print(count+1);Serial1.print(letter);Serial1.write(3);Serial1.write(0);Serial1.write(0);Serial1.write(4);delay(2);digitalWrite(LedComms, LOW);
-          }
-
-          if(cbuff[2]==timechar){ //currentTime
-            digitalWrite(LedComms, HIGH);Serial1.write(2);Serial1.print(myaddress);Serial1.write("t");Serial1.write("VALUE: ");Serial1.print(controlTime.ms());Serial1.write(3);Serial1.write(0);Serial1.write(0);Serial1.write(4); delay(2);digitalWrite(LedComms, LOW);
-          }
-
-          if(cbuff[2]==writechar){  //writting eeprom Json
-            /*unsigned char tbuff[lenbuff]={0}; //1024
-
-            char crc16_high;
-            char crc16_low;
-            int len=0;
-            int n=3;
-            //if(cbuff[1]==Addfalse){n=2;}
-            for(int x=n;; x++){
-              if(cbuff[x]==0x03)break;
-
-              tbuff[x-n]=cbuff[x]; // a partir del 3er byte y hasta 0.
-              len++;
+            if(cbuff[2]==Ping){
+              Debug.println("PING");
+              digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
             }
-            //Debug.print("len: ");
-            //Debug.println(len);
-              int dato = crc16_SingleBuf(tbuff,len);
-              crc16_high = highByte(dato);
-              crc16_low = lowByte(dato);
 
-            if(cbuff[xbuff-3]==crc16_low&&cbuff[xbuff-2]==crc16_high) //validacion CRC
-            {
-              Debug.println("valido crc");*/
+            if(cbuff[2]==runchar){  //run
+                if(flagload){
+                  flagrun = true; flagpause = false;
+                  program.runStep();
+                }
+                else
+                {
+                  digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(51); Serial1.write("ACTION: FAIL"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
+                }
+            }
+
+            if(cbuff[2]==pausechar){  //pause
+                if(flagrun){
+                  flagpause = true; flagrun=false;
+                  program.pauseStep();
+                }
+                else
+                {
+                  digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(52); Serial1.write("ACTION: FAIL"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+                }
+            }
+
+            if(cbuff[2]==stopchar){ //stop
+                if(flagpause||flagrun){
+                  program.stopStep();
+                }
+                if(!flagpause&&!flagrun)
+                {
+                  digitalWrite(LedComms, HIGH);Serial1.write(2);Serial1.print(myaddress); Serial1.write(53); Serial1.write("ACTION: FAIL"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
+                }
+            }
+
+            if(cbuff[2]==combchar){  //show I,V,T
+                digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);  Serial1.write("VALUE: ");Serial1.write("I");Serial1.print(valcurrent); Serial1.write(","); Serial1.write("V"); Serial1.print(valvoltage);Serial1.write(","); Serial1.write("T"); Serial1.print(valtemp); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+            }
+
+            /*if(cbuff[2]==ampchar){  //show I
+              digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress); Serial1.write("I"); Serial1.write("VALUE: ");Serial1.print(valcurrent); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+            }
+
+            if(cbuff[2]==voltchar){ //show V
+              digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);Serial1.write("V");Serial1.write("VALUE: ");Serial1.print(valvoltage); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
+            }
+            if(cbuff[2]==tempchar){ //show T
+              digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write("T");Serial1.write("VALUE: ");Serial1.print(valtemp); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+            }*/
+
+            if(cbuff[2]==stepchar){ //current step
+              digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);Serial1.write("P");Serial1.write("VALUE: ");Serial1.print(count+1);Serial1.print(letter);Serial1.write(3);Serial1.write(0);Serial1.write(0);Serial1.write(4);delay(2);digitalWrite(LedComms, LOW);
+            }
+
+            if(cbuff[2]==timechar){ //currentTime
+              digitalWrite(LedComms, HIGH);Serial1.write(2);Serial1.print(myaddress);Serial1.write("t");Serial1.write("VALUE: ");Serial1.print(controlTime.ms());Serial1.write(3);Serial1.write(0);Serial1.write(0);Serial1.write(4); delay(2);digitalWrite(LedComms, LOW);
+            }
+
+            if(cbuff[2]==writechar){  //writting eeprom Json
+
               if(cbuff[3]==0x5B){
                   int i=3;
                   char tmp[lenbuff]={0};
@@ -201,12 +208,6 @@ void comms_procesa_comando(void){
               {
                 digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: FAIL"); Serial1.write(3);Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
               }
-
-            /*}
-            else
-            {
-              Debug.println("invalido crc");
-            }*/
           }
 
           if(cbuff[2]==readchar){ //reading eeprom - send Json
@@ -225,10 +226,19 @@ void comms_procesa_comando(void){
               }
             }
           }
+
+
+          }
+          else
+          {
+            Debug.println("invalido-Address");
+          }
+
+
       }
       else
       {
-        Debug.println("invalido-Address");
+        Debug.println("invalido crc");
       }
 
       fin:

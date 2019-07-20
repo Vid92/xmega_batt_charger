@@ -38,7 +38,7 @@ char* eepromread(){
   char temp[1024];
   memset(temp,0,sizeof(temp));
 
-  //unsigned char temp2[1024];
+  unsigned char temp2[1024];
   int len = 0;
   for(int i = 0; i<1024;i++){
     //int val = EEPROM.read(i+1);//lee posicion
@@ -56,7 +56,7 @@ char* eepromread(){
     flagload = true;
 
     //Debug.print(len);
-    //temp2[len]= temp[len];
+    temp2[len]= temp[len];
 
     //int crc16 = crc16_SingleBuf(temp2,len);
     //int crc16_high = highByte(crc16);
