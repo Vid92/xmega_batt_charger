@@ -15,6 +15,7 @@ bool flagStep=false;
 bool flagtime=true;
 int count = 0;
 char letter = 0;
+char stepState = 0;
 int i=0;
 
 double valcurrent = 0; //solo para mostrar

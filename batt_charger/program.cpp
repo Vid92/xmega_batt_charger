@@ -3,6 +3,7 @@
 
 void Program::runStep(){
   this->state0 = 1;
+  stepState = 'R';
   digitalWrite(LED_BUILTIN, HIGH);
 
   digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(51); Serial1.write("ACTION: PASS,RUN"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
@@ -14,11 +15,13 @@ void Program::runStep(){
 
 void Program::pauseStep(){
   this->state0 = 2;
+  stepState = 'P';
   digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(52); Serial1.write("ACTION: PASS,PAUSE"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
 }
 
 void Program::stopStep(){
   this->state0 = 3;
+  stepState = 'S';
   digitalWrite(LedComms, HIGH);Serial1.write(2);Serial1.print(myaddress); Serial1.write(53); Serial1.write("ACTION: PASS,STOP"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
 }
 

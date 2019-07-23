@@ -11,7 +11,8 @@ extern double valcurrent;
 extern double valvoltage;
 extern double valtemp;
 extern int LedRelay;
-
+extern unsigned long Ttime;
+extern char stepState;
 
 class Control
 {

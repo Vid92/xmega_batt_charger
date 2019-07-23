@@ -19,6 +19,7 @@ extern float current[15];
 extern float maxtemp[15];
 extern float mintemp[15];
 extern unsigned int myaddress;
+extern unsigned long totalTime;
 
 extern bool flagload;
 extern int LedComms;

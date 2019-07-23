@@ -24,6 +24,8 @@ bool flagload = false;
 
 bool flagrun = false;
 bool flagpause = false;
+unsigned long totalTime;
+unsigned long Ttime;
 
 int toID;
 
@@ -90,7 +92,7 @@ void comms_procesa_comando(void){
 
     if(cbuff[0]==beginchar&&cbuff[xbuff-1]==endchar){
 
-      unsigned char tbuff[lenbuff]={0}; //1024
+     unsigned char tbuff[lenbuff]={0}; //1024
 
       char crc16_high;
       char crc16_low;
@@ -115,7 +117,7 @@ void comms_procesa_comando(void){
         crc16_high = highByte(dato);
         crc16_low = lowByte(dato);
 
-      if(cbuff[xbuff-3]==crc16_low&&cbuff[xbuff-2]==crc16_high) //validacion CRC
+      if(cbuff[xbuff-3]==crc16_low && cbuff[xbuff-2]==crc16_high) //validacion CRC
       {
         Debug.println("valido crc");
         if(cbuff[1]==myaddress) //address
@@ -128,6 +130,7 @@ void comms_procesa_comando(void){
             }
 
             if(cbuff[2]==runchar){  //run
+                if(!flagload){Debug.println("cargo");clearProgram();loadProgram();}
                 if(flagload){
                   flagrun = true; flagpause = false;
                   program.runStep();
@@ -160,7 +163,7 @@ void comms_procesa_comando(void){
             }
 
             if(cbuff[2]==combchar){  //show I,V,T
-                digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);  Serial1.write("VALUE: ");Serial1.write("I");Serial1.print(valcurrent); Serial1.write(","); Serial1.write("V"); Serial1.print(valvoltage);Serial1.write(","); Serial1.write("T"); Serial1.print(valtemp); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+                digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);  Serial1.write("VALUE: ");Serial1.write("I");Serial1.print(valcurrent); Serial1.write(","); Serial1.write("V"); Serial1.print(valvoltage);Serial1.write(","); Serial1.write("T"); Serial1.print(valtemp);Serial1.write(",");Serial1.write("P"); Serial1.print(count+1);Serial1.print(letter); Serial1.write(","); Serial1.write("t"); Serial1.print(controlTime.ms());Serial1.write(",");Serial1.write("Tt"); Serial1.print(Ttime + controlTime.ms());Serial1.write(","); Serial1.write("TT"); Serial1.print(totalTime); Serial1.write(","); Serial1.print(stepState); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
             }
 
             /*if(cbuff[2]==ampchar){  //show I
@@ -172,7 +175,7 @@ void comms_procesa_comando(void){
             }
             if(cbuff[2]==tempchar){ //show T
               digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write("T");Serial1.write("VALUE: ");Serial1.print(valtemp); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
-            }*/
+            }
 
             if(cbuff[2]==stepchar){ //current step
               digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);Serial1.write("P");Serial1.write("VALUE: ");Serial1.print(count+1);Serial1.print(letter);Serial1.write(3);Serial1.write(0);Serial1.write(0);Serial1.write(4);delay(2);digitalWrite(LedComms, LOW);
@@ -180,7 +183,7 @@ void comms_procesa_comando(void){
 
             if(cbuff[2]==timechar){ //currentTime
               digitalWrite(LedComms, HIGH);Serial1.write(2);Serial1.print(myaddress);Serial1.write("t");Serial1.write("VALUE: ");Serial1.print(controlTime.ms());Serial1.write(3);Serial1.write(0);Serial1.write(0);Serial1.write(4); delay(2);digitalWrite(LedComms, LOW);
-            }
+            }*/
 
             if(cbuff[2]==writechar){  //writting eeprom Json
 
@@ -200,9 +203,6 @@ void comms_procesa_comando(void){
                   flagload = false;
 
                   digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
-                  clearProgram();
-                  loadProgram();
-                  Debug.println("cargo");
               }
               else
               {

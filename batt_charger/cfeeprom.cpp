@@ -18,8 +18,6 @@ char* readAddress(){
 }
 
 void eepromsave(char* tmp){ //comparacion CR1 CR2 enviado
-  //unsigned char tmp2[1024];
-  //int len = 0;
   for(int i = 0; i<1024;i++){ //256 512
     /*if(tmp[i]== 0xFF || tmp[i] == 0){
       break;
@@ -27,51 +25,40 @@ void eepromsave(char* tmp){ //comparacion CR1 CR2 enviado
     //EEPROM.write(i+1,tmp[i]);
     //i2c_eeprom.write(i+1,tmp[i]);
     writeEEPROM(disk1,i+1,tmp[i]);
-    //len++;
   }
-  //tmp2[len]= tmp[len];
-  //int crc16 = crc16_SingleBuf(tmp2,len);
-  //Debug.print(tmp);
+  Debug.print(tmp);
+  //Debug.print("ok-eeprom");
 }
 
 char* eepromread(){
   char temp[1024];
+  //unsigned char temp[1024];
   memset(temp,0,sizeof(temp));
 
-  unsigned char temp2[1024];
-  int len = 0;
-  for(int i = 0; i<1024;i++){
+    //int len=0;
+    int val=0;
+    for(int i = 0; i<1024;i++){
     //int val = EEPROM.read(i+1);//lee posicion
     //int val = i2c_eeprom.read(i+1);
-    int val = readEEPROM(disk1,i+1);
+    val = readEEPROM(disk1,i+1);
     if(val== 0xFF || val == 0){
       break;
     }
+    //len++;
     temp[i] = (char)val;
-    len++;
-    //Debug.print(temp);
   }
-    //Debug.print(temp);
+    Debug.print(temp);
 
     flagload = true;
 
-    //Debug.print(len);
-    temp2[len]= temp[len];
-
-    //int crc16 = crc16_SingleBuf(temp2,len);
-    //int crc16_high = highByte(crc16);
-    //int crc16_low = lowByte(crc16);
-
-    //Debug.print(crc16_low); Debug.print(crc16_high);
-
     if(flagpause){digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write("VALUE: "); Serial1.print("R"); Serial1.print(temp); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);}
 
-    /*for(int i=0;i<512;i++){
-      Serial.print("a[");
-      Serial.print(i);
-      Serial.print("]=");
-      Serial.print(temp[i],HEX);
-      Serial.println();
+    /*for(int i=0;i<len;i++){
+      Debug.print("a[");
+      Debug.print(i);
+      Debug.print("]=");
+      Debug.print(temp[i],HEX);
+      Debug.println();
 
       /*if(temp[i]==0x00){
         Serial.print("l=");
@@ -79,17 +66,18 @@ char* eepromread(){
         break;
       }
     }*/
+    Debug.print(sizeof(temp));
 
-    StaticJsonBuffer<2048> jsonBuffer;
+    StaticJsonBuffer<512> jsonBuffer;//2048
     JsonArray& root = jsonBuffer.parseArray(temp);
 
-    //Serial1.print(temp);
+    Debug.print(temp);
 
     /*if (!root.success())
     {
     	Debug.println("lectura() failed");
     }*/
-
+    totalTime = 0;
     for(int i= 0; i<15; i++){
       const char* type0 = root[i]["Type"];
       if(type[0] == '\0'){
@@ -100,12 +88,18 @@ char* eepromread(){
       float temperature1 = root[i]["Maxtemp"];
       float temperature2 = root[i]["Mintemp"];
 
+
       strcpy(type[i],type0);
       duration[i]=time;
+      totalTime = totalTime + duration[i];
+      //Debug.println(totalTime);
+
       current[i]=current0;
       maxtemp[i]=temperature1;
       mintemp[i]=temperature2;
     }
+    //Debug.print("Total:");
+    Debug.println(totalTime);
 }
 
 void clearProgram(){
@@ -118,6 +112,7 @@ void clearProgram(){
     maxtemp[i]=0;
     mintemp[i]=0;
   }
+  Debug.println("clean");
 }
 
 void loadProgram(){

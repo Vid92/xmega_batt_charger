@@ -103,6 +103,7 @@ void Control::event() {
         {
             if(valtemp > this->maxTemp){ //se va a pause
               this->state=2; Debug.println("Pause-temp");
+              stepState = 'PT';
             }
 
             if(valcurrent < this->val_control)
@@ -122,6 +123,7 @@ void Control::event() {
         else
         {
           Debug.println("timeout-agotado");
+          Ttime= Ttime + controlTime.ms();
           controlTime.stop();
           flagStep=true;
         }
@@ -149,6 +151,7 @@ void Control::event() {
         Debug.println("stepPause out");
         //this->state = 3;
         flagStep=true;
+        Ttime= Ttime + controlTime.ms();
       }
     }
       delay(1);
