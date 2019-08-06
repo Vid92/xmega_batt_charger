@@ -26,6 +26,7 @@ class Control
   float valAH = 0;
   unsigned long timeout = 0;
   unsigned long steptime = 0;
+  unsigned long Ttime0 = 0;
   int state = 0; // 1 = running, 2 = pause, 3 = stop
   int prevstate = 0;
   int valrampa = 0;

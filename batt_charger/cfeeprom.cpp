@@ -138,7 +138,7 @@ char* eepromread(){
       maxtemp[i]=temperature1;
       mintemp[i]=temperature2;
     }
-    totalTime = totalAH + (totalDuration*0.001);
+    totalTime = totalAH + totalDuration;
     Debug.println(totalTime);
 }
 

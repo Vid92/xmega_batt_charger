@@ -11,7 +11,7 @@ void Control::setCurrent(float val_control){
 }
 
 void Control::setTime(unsigned long timeout){
-  this->timeout = timeout;
+  this->timeout = timeout * 1000;
 }
 
 void Control::setAmpHour(float valAmpHour){
@@ -63,7 +63,7 @@ void Control::runPause(){
 }
 
 void Control::stepPause(unsigned long steptime){
-  this->steptime = steptime;
+  this->steptime = steptime * 1000;
 }
 
 
@@ -129,7 +129,8 @@ void Control::event() {
           else
           {
             Debug.println("timeout-agotado");
-            Ttime = Ttime + (controlTime.ms()*0.001);
+            Ttime0 = Ttime;
+            Ttime = Ttime0 + (controlTime.ms()*0.001);
             controlTime.stop();
             flagStep=true;
           }
@@ -180,7 +181,8 @@ void Control::event() {
         Debug.println("stepPause out");
         //this->state = 3;
         flagStep=true;
-        Ttime= Ttime + (controlTime.ms()*0.001);
+        Ttime0 = Ttime;
+        Ttime = Ttime0 + (controlTime.ms()*0.001);
       }
     }
       delay(1);
@@ -200,7 +202,7 @@ void Control::event() {
   }
 
   //if((this->prevstate!= 2 || this->prevstate == 2)&&this->state == 2)
-  if(this->prevstate!= 2 &&this->state == 2)
+  if(this->prevstate!= 2 && this->state == 2)
   {
      Debug.println("PAUSE");
      controlTime.pause();

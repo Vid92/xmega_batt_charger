@@ -14,9 +14,9 @@ bool flagbuff = false;
 bool flagStep=false;
 bool flagtime=true;
 int count = 0;
-char letter = 0;
+char letter = 0x49; //I
 char stepState = 0x49;
-int i=0;
+//int i=0;
 
 double valcurrent = 0; //solo para mostrar
 double valvoltage = 0;

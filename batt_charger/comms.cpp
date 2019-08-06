@@ -25,7 +25,7 @@ bool flagload = false;
 bool flagrun = false;
 bool flagpause = false;
 unsigned long totalTime;
-unsigned long Ttime;
+unsigned long Ttime=0;
 
 int toID;
 int x = 0;
