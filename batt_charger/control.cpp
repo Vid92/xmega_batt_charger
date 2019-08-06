@@ -85,6 +85,8 @@ void Control::readData(){
   this->valcurrent0 = this->averageCurrent - 36.0;
   valcurrent = this->valcurrent0 * 35.0 / 1023.0;
 
+  this->valAH = valcurrent * 0.000277 * controlTime.ms() * 0.001;
+
   //Debug.println(this->averageVoltage);
   this->valvoltage0 = this->averageVoltage - 44.0;
   valvoltage = this->valvoltage0 * 500.0 / 1023.0;
@@ -99,47 +101,74 @@ void Control::event() {
   {
       if(controlTime.isRunning())
       {
-        if(controlTime.ms() < this->timeout)
-        {
-            if(valtemp > this->maxTemp){ //se va a pause
-              this->state=2; Debug.println("Pause-temp");
-              stepState = 'PT';
-            }
+        if(this->timeout!=0){
+          //Debug.print("TIMEOUT");
+          if(controlTime.ms() < this->timeout)
+          {
+              if(this->maxTemp!=0){
+                if(valtemp > this->maxTemp){ //se va a pause
+                  this->state=2; Debug.println("Pause-temp");
+                  stepState = 'T';
+                }
+              }
 
-            if(valcurrent < this->val_control)
-            {
-              if (this->valrampa<0xFFF)
-                this->valrampa++;
-            }
+              if(valcurrent < this->val_control)
+              {
+                if (this->valrampa<0xFFF)
+                  this->valrampa++;
+              }
 
-            if(valcurrent > this->val_control)
-            {
-              if(this->valrampa > 0)
-                this->valrampa--;
-            }
-            dac.write(0xFFF-this->valrampa);
-            delay(1);
+              if(valcurrent > this->val_control)
+              {
+                if(this->valrampa > 0)
+                  this->valrampa--;
+              }
+              dac.write(0xFFF-this->valrampa);
+              delay(1);
+          }
+          else
+          {
+            Debug.println("timeout-agotado");
+            Ttime = Ttime + (controlTime.ms()*0.001);
+            controlTime.stop();
+            flagStep=true;
+          }
         }
         else
         {
-          Debug.println("timeout-agotado");
-          Ttime= Ttime + controlTime.ms();
-          controlTime.stop();
-          flagStep=true;
+          //Debug.print("AH");
+          if(this->valAH < this->valAmpHour)
+          {
+              if(this->maxTemp!=0){
+                if(valtemp > this->maxTemp){ //se va a pause
+                  this->state=2; Debug.println("Pause-temp");
+                  stepState = 'T';
+                }
+              }
+
+              if(valcurrent < this->val_control)
+              {
+                if (this->valrampa<0xFFF)
+                  this->valrampa++;
+              }
+
+              if(valcurrent > this->val_control)
+              {
+                if(this->valrampa > 0)
+                  this->valrampa--;
+              }
+              dac.write(0xFFF-this->valrampa);
+              delay(1);
+          }
+          else
+          {
+            Debug.println("timeout-agotado");
+            controlTime.stop();
+            flagStep=true;
+          }
         }
       }
   }
-
-
-  /*
-
-    if(this->valAmpHour0 < this->valAmpHour){
-      //hace control
-
-    }
-
-
-  */
 
   if(this->state == 4)
   {
@@ -151,7 +180,7 @@ void Control::event() {
         Debug.println("stepPause out");
         //this->state = 3;
         flagStep=true;
-        Ttime= Ttime + controlTime.ms();
+        Ttime= Ttime + (controlTime.ms()*0.001);
       }
     }
       delay(1);
@@ -176,19 +205,18 @@ void Control::event() {
      Debug.println("PAUSE");
      controlTime.pause();
       while(this->valrampa > 0)
-      //if(this->valrampa > 0)
       {
         this->valrampa--;
         dac.write(0xFFF-this->valrampa);
         delay(1);
       }
-      //if(this->valrampa==0)
       digitalWrite(LedRelay, LOW); //solo digitalWrite
   }
 
   if(this->prevstate == 2 &&this->state == 2){
     if(valtemp <= minTemp){
       this->state = 1;
+      stepState = 'R';
       Debug.println("good-temp");
     }
   }

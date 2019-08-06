@@ -28,6 +28,7 @@ unsigned long totalTime;
 unsigned long Ttime;
 
 int toID;
+int x = 0;
 
 void doTimeout(void);
 
@@ -48,7 +49,6 @@ void comms_inicbuff(void){ // Inicia a 0 cbuff -------------------
 int comms_addcbuff(char c){ // Añade a cbuff -----------------------
 
   switch(c){
-
     case endchar:           // Enter -> Habilita Flag para procesar
       cbuff[xbuff]=c; // Añade carácter recibido al Buffer
       xbuff++;
@@ -89,14 +89,14 @@ void comms_procesa_comando(void){
   for(int i=0;i<lenbuff;i++){ // Bucle que pone a 0 todos los
     arg[i]=0x00; // caracteres en el argumento
   }
-
-    if(cbuff[0]==beginchar&&cbuff[xbuff-1]==endchar){
+    int len =0;
+    if(cbuff[0]==beginchar&&cbuff[xbuff-4]==0x03&&cbuff[xbuff-1]==endchar){
 
      unsigned char tbuff[lenbuff]={0}; //1024
 
       char crc16_high;
       char crc16_low;
-      int len=0;
+
       int n=3;
       //if(cbuff[1]==Addfalse){n=2;}
       for(int x=n;; x++){
@@ -110,12 +110,15 @@ void comms_procesa_comando(void){
       Debug.print("msg: ");
         for(int i=0;i<len;i++){
           Debug.print(tbuff[i],HEX);
-
         }
+          Debug.println(len);
+      if(len<lenbuff){
 
+        Debug.print("entroLEN");
         int dato = crc16_SingleBuf(tbuff,len);
         crc16_high = highByte(dato);
         crc16_low = lowByte(dato);
+      }
 
       if(cbuff[xbuff-3]==crc16_low && cbuff[xbuff-2]==crc16_high) //validacion CRC
       {
@@ -163,7 +166,7 @@ void comms_procesa_comando(void){
             }
 
             if(cbuff[2]==combchar){  //show I,V,T
-                digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);  Serial1.write("VALUE: ");Serial1.write("I");Serial1.print(valcurrent); Serial1.write(","); Serial1.write("V"); Serial1.print(valvoltage);Serial1.write(","); Serial1.write("T"); Serial1.print(valtemp);Serial1.write(",");Serial1.write("P"); Serial1.print(count+1);Serial1.print(letter); Serial1.write(","); Serial1.write("t"); Serial1.print(controlTime.ms());Serial1.write(",");Serial1.write("Tt"); Serial1.print(Ttime + controlTime.ms());Serial1.write(","); Serial1.write("TT"); Serial1.print(totalTime); Serial1.write(","); Serial1.print(stepState); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+                digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);  Serial1.write("VALUE: ");Serial1.write("I");Serial1.print(valcurrent); Serial1.write(","); Serial1.write("V"); Serial1.print(valvoltage);Serial1.write(","); Serial1.write("T"); Serial1.print(valtemp);Serial1.write(",");Serial1.write("P"); Serial1.print(count+1);Serial1.print(letter); Serial1.write(","); Serial1.write("t"); Serial1.print(controlTime.ms()*0.001);Serial1.write(",");Serial1.write("Tt"); Serial1.print(Ttime + (controlTime.ms()*0.001)); Serial1.write(","); Serial1.write("TT"); Serial1.print(totalTime); Serial1.write(","); Serial1.print(stepState); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
             }
 
             /*if(cbuff[2]==ampchar){  //show I
@@ -187,7 +190,15 @@ void comms_procesa_comando(void){
 
             if(cbuff[2]==writechar){  //writting eeprom Json
 
-              if(cbuff[3]==0x5B){
+              /*int t=3;
+              char eepromID[lenbuff]={0};
+              do{
+                eepromID[t-3]=cbuff[t];
+
+              }while(t<27);//25 caracteres
+              IDread(eepromID);*/
+
+              if(cbuff[3]==0x5B){ //OJO!! 28
                   int i=3;
                   char tmp[lenbuff]={0};
 
@@ -199,33 +210,38 @@ void comms_procesa_comando(void){
                   //Debug.print(tmp);
                   Debug.println("writingEEPROM");
                   //clearProgram();
+                  for (int i = 1 ; i <1024 ; i++) { //27
+                    writeEEPROM(disk1,i,0);
+                  }
                   eepromsave(tmp);
                   flagload = false;
 
-                  digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
-              }
-              else
-              {
-                digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: FAIL"); Serial1.write(3);Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
-              }
-          }
+                  if(len==x)
+                  {
+                    digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
 
-          if(cbuff[2]==readchar){ //reading eeprom - send Json
-            if(flagpause)
-            {
-              Debug.println("readingEEPROM");
-              clearProgram();
-              loadProgram();
-              for(int i=0; i <15;i++){
-                if(type[i][0] == 30){
-                  break;
-                }
-                if(duration[i] == '\0'){
-                    break;
-                }
+                    uint8_t oldInterruptState = SREG;  // no real need to store the interrupt context as the reset will pre-empt its restoration
+                    asm("cli");                        // Disable interrupts
+
+                    CCP = 0xD8;                        // Configuration change protection: allow protected IO regiser write
+                    RST.CTRL = RST_SWRST_bm;           // Request software reset by writing to protected IO register
+
+                    SREG=oldInterruptState;           // Restore interrupts enabled/disabled state (out of common decency - this line will never be reached because the reset will pre-empt it)
+                  }
+
+                  else
+                  {
+                    digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: FAIL"); Serial1.write(3);Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+                  }
               }
             }
-          }
+
+            if(cbuff[2]==readchar){ //reading eeprom -IDProgram
+                Debug.println("readingIDProgram");
+                clearProgram();
+                IDread();
+                //eepromread();
+            }
 
 
           }
@@ -241,7 +257,7 @@ void comms_procesa_comando(void){
         Debug.println("invalido crc");
       }
 
-      fin:
+      //fin:
       if(!flagbuff)comms_inicbuff(); // Borro buffer.
       Debug.println("Procesado"); // Monitorizo procesado.
     }

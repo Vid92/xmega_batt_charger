@@ -23,6 +23,7 @@ class Control
   float maxTemp = 0;
   float minTemp = 0;
   float valAmpHour = 0;
+  float valAH = 0;
   unsigned long timeout = 0;
   unsigned long steptime = 0;
   int state = 0; // 1 = running, 2 = pause, 3 = stop
@@ -36,9 +37,6 @@ class Control
   double valvoltage0 = 0;
   double valtemp0 = 0;
   double valAmpHour0 = 0;
-  //StopWatch controlTime;
-
-//  long averageTemp = 0;
 
   void begin();
   void setCurrent(float val_control);

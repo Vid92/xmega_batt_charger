@@ -51,6 +51,7 @@ void Program::process_step()
       letter = 'C';
       Debug.println("Step-Charge");
       control.setTime(duration[count]);
+      control.setAmpHour(AmperH[count]);
       control.setCurrent(current[count]);
       control.setTemperature(maxtemp[count],mintemp[count]);
       control.run();
@@ -66,6 +67,7 @@ void Program::process_step()
       case 'E':  //End
       letter = 'E';
       control.stop();
+      stepState = 'E';
       Debug.println("Step-End");
       break;
       default:break;

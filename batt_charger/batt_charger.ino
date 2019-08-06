@@ -15,7 +15,7 @@ bool flagStep=false;
 bool flagtime=true;
 int count = 0;
 char letter = 0;
-char stepState = 0;
+char stepState = 0x49;
 int i=0;
 
 double valcurrent = 0; //solo para mostrar
@@ -35,6 +35,7 @@ int LedRelay = 20;
 char anbu[1024];  //cfg json
 char type[15][20]; //inicio, pausa,carga, fin
 unsigned long duration[15]; //time
+float AmperH[15];
 float current[15];
 float maxtemp[15];
 float mintemp[15];
@@ -75,6 +76,7 @@ void loop()
   program.process_step();
   control.event();
 
+
   if(flagStep)
   {
     flagStep = false;
@@ -87,7 +89,7 @@ void printMessage()
     Debug.print("millis() : ");
     Debug.print(millis());
     Debug.print(", stopwatch : ");
-    Debug.println(controlTime.ms());
+    Debug.println(controlTime.ms()*0.001);
 }
 
 void serialEvent1()
