@@ -43,7 +43,7 @@ void comms_inicbuff(void){ // Inicia a 0 cbuff -------------------
   }
   xbuff=0;//0x00               // Inicializo el índice de siguiente
   flagbuff=true;                    // carácter
-  Debug.println("limpio");
+  //Debug.println("limpio");
 }
 
 int comms_addcbuff(char c){ // Añade a cbuff -----------------------
@@ -68,7 +68,7 @@ int comms_addcbuff(char c){ // Añade a cbuff -----------------------
 void doTimeout(){
   to.stop(toID);
   if(!flagbuff){
-    Debug.println("ERROR");
+    //Debug.println("ERROR");
     comms_inicbuff();
   }
 }
@@ -80,7 +80,7 @@ void comms_procesa_comando(void){
   flagcommand=false; // Desactivo flag de comando pendiente.
   flagbuff =false;
 
-  Debug.println("Procesando..."); // Monitorizo procesando ...
+  //Debug.println("Procesando..."); // Monitorizo procesando ...
   /*for(int i=0;i<xbuff;i++){
     Debug.print(cbuff[i]);
   }
@@ -105,16 +105,16 @@ void comms_procesa_comando(void){
         tbuff[x-n]=cbuff[x]; // a partir del 3er byte y hasta 0.
         len++;
       }
-      Debug.print("len: ");
-      Debug.println(len);
-      Debug.print("msg: ");
+      //Debug.print("len: ");
+      //Debug.println(len);
+      //Debug.print("msg: ");
         for(int i=0;i<len;i++){
-          Debug.print(tbuff[i],HEX);
+          //Debug.print(tbuff[i],HEX);
         }
-          Debug.println(len);
+          //Debug.println(len);
       if(len<lenbuff){
 
-        Debug.print("entroLEN");
+        //Debug.print("entroLEN");
         int dato = crc16_SingleBuf(tbuff,len);
         crc16_high = highByte(dato);
         crc16_low = lowByte(dato);
@@ -122,10 +122,10 @@ void comms_procesa_comando(void){
 
       if(cbuff[xbuff-3]==crc16_low && cbuff[xbuff-2]==crc16_high) //validacion CRC
       {
-        Debug.println("valido crc");
+        //Debug.println("valido crc");
         if(cbuff[1]==myaddress) //address
         {
-            Debug.println("valido address");
+            //Debug.println("valido address");
 
             if(cbuff[2]==Ping){
               Debug.println("PING");
@@ -259,6 +259,6 @@ void comms_procesa_comando(void){
 
       //fin:
       if(!flagbuff)comms_inicbuff(); // Borro buffer.
-      Debug.println("Procesado"); // Monitorizo procesado.
+      //Debug.println("Procesado"); // Monitorizo procesado.
     }
 }

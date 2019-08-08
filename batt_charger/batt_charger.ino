@@ -89,14 +89,16 @@ void printMessage()
     Debug.print("millis() : ");
     Debug.print(millis());
     Debug.print(", stopwatch : ");
-    Debug.println(controlTime.ms()*0.001);
+    Debug.print(controlTime.ms()*0.001);
+    Debug.print(", Ttime : ");
+    Debug.println(Ttime);
 }
 
 void serialEvent1()
 {    // Interrupción recepción serie USART
     flagbuff = false;
     rcvchar=0x00;        // Inicializo carácter recibido
-    Debug.println("EventoSerial");
+    //Debug.println("EventoSerial");
 
     while(Serial1.available()){         // Si hay algo pendiente de recibir ...
 

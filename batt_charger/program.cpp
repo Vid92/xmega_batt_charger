@@ -7,7 +7,7 @@ void Program::runStep(){
   digitalWrite(LED_BUILTIN, HIGH);
 
   digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(51); Serial1.write("ACTION: PASS,RUN"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
-
+  Ttime=0;
   if((type[count][0]) == 'E'){
     count = 0;
   }
@@ -79,7 +79,7 @@ void Program::process_step()
   {
     control.stop();
     count = 0;
-    letter = {0};
+    letter = 0x49;
   }
 
   if(this->prevstate0!= 2 && this->state0 == 2)

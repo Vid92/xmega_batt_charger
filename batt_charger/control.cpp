@@ -48,6 +48,7 @@ void Control::runPause(){
   valvoltage = 0;
   valtemp = 0;
 
+  controlTime.stop();
   while(this->valrampa > 0)
   {
     this->valrampa--;
@@ -57,7 +58,7 @@ void Control::runPause(){
 
   digitalWrite(LedRelay, LOW);
 
-  if((this->prevstate == 0 || this->prevstate == 3 || this->prevstate == 1) && this->state == 4){
+  if((this->prevstate == 0 || this->prevstate == 3 || this->prevstate == 1 || this->prevstate == 4) && this->state == 4){
     controlTime.start();
   }
 }
@@ -93,6 +94,7 @@ void Control::readData(){
 
   //Debug.println(this->valvoltage0);
   valtemp = this->averageTemp * 120.0 / 1023.0;
+  delay(1);
 }
 
 void Control::event() {
@@ -129,8 +131,8 @@ void Control::event() {
           else
           {
             Debug.println("timeout-agotado");
-            Ttime0 = Ttime;
-            Ttime = Ttime0 + (controlTime.ms()*0.001);
+            this->Ttime0 = Ttime;
+            Ttime = this->Ttime0 + (controlTime.ms()*0.001);
             controlTime.stop();
             flagStep=true;
           }
@@ -164,6 +166,8 @@ void Control::event() {
           else
           {
             Debug.println("timeout-agotado");
+            this->Ttime0 = Ttime;
+            Ttime = this->Ttime0 + (controlTime.ms()*0.001);
             controlTime.stop();
             flagStep=true;
           }
@@ -181,8 +185,8 @@ void Control::event() {
         Debug.println("stepPause out");
         //this->state = 3;
         flagStep=true;
-        Ttime0 = Ttime;
-        Ttime = Ttime0 + (controlTime.ms()*0.001);
+        this->Ttime0 = Ttime;
+        Ttime = this->Ttime0 + (controlTime.ms()*0.001);
       }
     }
       delay(1);

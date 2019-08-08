@@ -73,13 +73,13 @@ char* eepromread(){
     //digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write("VALUE: "); Serial1.print("R"); Serial1.print(temp); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
     /*int val=0;
     for(int i=0;i<read;i++){
-      /*Debug.print("a[");
+      Debug.print("a[");
       Debug.print(i);
       Debug.print("]=");
       Debug.print(temp[i],HEX);
-      Debug.println();*/
+      Debug.println();
 
-    /*  if(temp[i]==0x7B){
+      if(temp[i]==0x7B){
         for(i=i;i<read;i++){
           Debug.print(i);
           if(temp[i]==0x7D){
@@ -92,8 +92,8 @@ char* eepromread(){
         Serial.print("l=");
         Serial.println(i+1);
         break;
-      }
-    }*/
+      }*/
+    //}
     Debug.print("Json");
 
     StaticJsonBuffer<1024> jsonBuffer;
