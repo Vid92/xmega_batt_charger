@@ -13,6 +13,7 @@ extern double valtemp;
 extern int LedRelay;
 extern unsigned long Ttime;
 extern char stepState;
+extern float valAH;
 
 class Control
 {
@@ -23,7 +24,7 @@ class Control
   float maxTemp = 0;
   float minTemp = 0;
   float valAmpHour = 0;
-  float valAH = 0;
+  //float valAH = 0;
   unsigned long timeout = 0;
   unsigned long steptime = 0;
   unsigned long Ttime0 = 0;

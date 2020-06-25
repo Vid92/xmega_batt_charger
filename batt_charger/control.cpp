@@ -83,10 +83,10 @@ void Control::readData(){
   this->averageVoltage = this->averageVoltage / 40;
   this->averageTemp = this->averageTemp / 40;
 
-  this->valcurrent0 = this->averageCurrent - 36.0;
+  this->valcurrent0 = this->averageCurrent - 70.0; //36
   valcurrent = this->valcurrent0 * 35.0 / 1023.0;
 
-  this->valAH = valcurrent * 0.000277 * controlTime.ms() * 0.001;
+  valAH = valcurrent * 0.000277 * controlTime.ms() * 0.001;
 
   //Debug.println(this->averageVoltage);
   this->valvoltage0 = this->averageVoltage - 44.0;
@@ -140,7 +140,7 @@ void Control::event() {
         else
         {
           //Debug.print("AH");
-          if(this->valAH < this->valAmpHour)
+          if(valAH < this->valAmpHour)
           {
               if(this->maxTemp!=0){
                 if(valtemp > this->maxTemp){ //se va a pause

@@ -17,10 +17,13 @@ int count = 0;
 char letter = 0x49; //I
 char stepState = 0x49;
 //int i=0;
+//int state0 = 0;
+//int prevstate0 = 0;
 
 double valcurrent = 0; //solo para mostrar
 double valvoltage = 0;
 double valtemp = 0;
+float valAH = 0;
 
 StopWatch controlTime;
 Control control;
@@ -42,8 +45,8 @@ float mintemp[15];
 
 void setup()
 {
-  Debug.begin(115200);
-  Serial1.begin(115200);
+  Debug.begin(9600);
+  Serial1.begin(9600);
   Wire.begin();
   control.begin();
 
@@ -91,7 +94,9 @@ void printMessage()
     Debug.print(", stopwatch : ");
     Debug.print(controlTime.ms()*0.001);
     Debug.print(", Ttime : ");
-    Debug.println(Ttime);
+    Debug.print(Ttime);
+    Debug.print(", AH : ");
+    Debug.println(valAH);
 }
 
 void serialEvent1()

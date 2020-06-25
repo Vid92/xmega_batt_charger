@@ -33,5 +33,6 @@ char* eepromread(void);
 //char* readAddress(void);
 void clearProgram(void);
 void loadProgram(void);
+//extern char data_crc(String val);
 
 #endif

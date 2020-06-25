@@ -9,6 +9,9 @@ extern Control control;
 extern int count;
 extern char letter;
 
+//extern int state0;
+//extern int prevstate0;
+
 class Program
 {
   public:

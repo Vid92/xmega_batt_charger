@@ -18,4 +18,5 @@ void comms_inicbuff(void);        // Borra buffer
 int comms_addcbuff(char c);       // añade carácter recibido al buffer
 void comms_procesa_comando(void); // Procesa comando
 
+
 #endif

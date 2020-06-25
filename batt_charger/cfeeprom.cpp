@@ -15,6 +15,22 @@ char* readAddress(){
     //int val = EEPROM.read(0);
     //myaddress = value;
 }*/
+/*
+char data_crc(String val){
+  char buffer[1024] = {0};
+  strcpy(buffer,val.c_str());
+
+  int lenbff = 0;
+  unsigned char tmp_crc[1024]={0};
+  for(int i=0;i<val.length();i++)
+  {
+      tmp_crc[i]=buffer[i];
+      lenbff++;
+  }
+  int dato = crc16_SingleBuf(tmp_crc,lenbff);
+  outcrc16_high = highByte(dato);
+  outcrc16_low = lowByte(dato);
+}*/
 
 void eepromsave(char* tmp){ //comparacion CR1 CR2 enviado
   x=0;
@@ -27,9 +43,9 @@ void eepromsave(char* tmp){ //comparacion CR1 CR2 enviado
     x++;
     writeEEPROM(disk1,i+25,tmp[i]);
   }
-  Debug.print("x: ");
-  Debug.println(x);
-  Debug.print(tmp);
+  //Debug.print("x: ");
+  //Debug.println(x);
+  //Debug.print(tmp);
   //Debug.print("ok-eeprom");
 }
 
