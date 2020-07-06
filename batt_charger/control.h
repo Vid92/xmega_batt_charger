@@ -25,9 +25,23 @@ class Control
   float minTemp = 0;
   float valAmpHour = 0;
   //float valAH = 0;
+
+  bool flagS = false;
+  bool flagO = false;
+  bool flagTemp = false;
+  bool flagPause = false;
+  bool flagEnable = false;
+
   unsigned long timeout = 0;
   unsigned long steptime = 0;
   unsigned long Ttime0 = 0;
+
+  unsigned long time1 = 30000; //ms ->60seg-1min
+  unsigned long time2 = 50000;
+  unsigned long t1 = 0;
+  unsigned long t2 = 0;
+  unsigned long timeAH = 0;
+
   int state = 0; // 1 = running, 2 = pause, 3 = stop
   int prevstate = 0;
   int valrampa = 0;
@@ -35,6 +49,7 @@ class Control
   long averageVoltage = 0;
   long averageTemp  = 0;
 
+  double tmpVal = 0;
   double valcurrent0 = 0;
   double valvoltage0 = 0;
   double valtemp0 = 0;
@@ -52,6 +67,7 @@ class Control
   void stop();
   void event();
   void readData();
+  bool states();
 };
 
 #endif

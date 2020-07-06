@@ -17,16 +17,13 @@ void Program::runStep(){
 
 void Program::pauseStep(){
   this->state0 = 2;
-  //state0 = 2;
-  stepState = 'P';
+  //stepState = 'P';
 
   digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(52); Serial1.write("ACTION: PASS,PAUSE"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
 }
 
 void Program::stopStep(){
   this->state0 = 3;
-  //state0 = 3;
-  stepState = 'S';
 
   digitalWrite(LedComms, HIGH);Serial1.write(2);Serial1.print(myaddress); Serial1.write(53); Serial1.write("ACTION: PASS,STOP"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
 }
@@ -42,7 +39,6 @@ void Program::nextStep(){
 void Program::process_step()
 {
   if(this->state0 == 1)
-  //if(state0 == 1)
   {
     Debug.println("entro-program");
     //Debug.print(type[count][0]);
@@ -58,9 +54,9 @@ void Program::process_step()
       case 'C':  //Charge
       letter = 'C';
       Debug.println("Step-Charge");
+      control.setCurrent(current[count]);
       control.setTime(duration[count]);
       control.setAmpHour(AmperH[count]);
-      control.setCurrent(current[count]);
       control.setTemperature(maxtemp[count],mintemp[count]);
       control.run();
       break;
@@ -81,7 +77,11 @@ void Program::process_step()
       default:break;
     }
     this->state0=4;
-    //state0=4;
+  }
+
+  if(control.states())
+  {
+    this->state0 = 3;
   }
 
   if(this->prevstate0!=3 && this->state0 == 3)

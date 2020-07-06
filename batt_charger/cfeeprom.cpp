@@ -136,8 +136,8 @@ char* eepromread(){
       float currentAH = root[i]["AH"];
 
       float current0 = root[i]["Current"];
-      float temperature1 = root[i]["Maxtemp"];
-      float temperature2 = root[i]["Mintemp"];
+      float temperature1 = root[i]["MaxTemp"];
+      float temperature2 = root[i]["MinTemp"];
 
       strcpy(type[i],type0);
       duration[i]=time;
@@ -150,7 +150,6 @@ char* eepromread(){
       //Debug.println(timeAH);
       totalAH = totalAH + timeAH;
       //Debug.println(totalAH);
-
       maxtemp[i]=temperature1;
       mintemp[i]=temperature2;
     }

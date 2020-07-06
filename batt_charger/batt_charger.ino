@@ -45,6 +45,7 @@ float mintemp[15];
 
 void setup()
 {
+  //baudios
   Debug.begin(9600);
   Serial1.begin(9600);
   Wire.begin();
@@ -97,6 +98,12 @@ void printMessage()
     Debug.print(Ttime);
     Debug.print(", AH : ");
     Debug.println(valAH);
+    Debug.print(", tmp :");
+    Debug.println(valtemp);
+    //Debug.print(", current : ");
+    //Debug.println(valcurrent);
+    //Debug.print(", state :");
+    //Debug.println(stepState);
 }
 
 void serialEvent1()
