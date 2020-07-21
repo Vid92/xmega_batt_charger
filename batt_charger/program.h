@@ -7,7 +7,7 @@
 
 extern Control control;
 extern int count;
-extern char letter;
+extern String letter; //char
 
 //extern int state0;
 //extern int prevstate0;

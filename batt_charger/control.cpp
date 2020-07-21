@@ -14,7 +14,7 @@ void Control::setTime(unsigned long timeout){
   this->timeout = timeout * 1000;
   if(this->timeout!=0){
     if (this->timeout <= 60000) //diferenciar entre seg. o min-hor
-    {
+    { //verificar!!!
       this->time1 = 500;
       this->time2 = 900;
     }
@@ -42,6 +42,8 @@ void Control::run() {
 
   digitalWrite(LedRelay, HIGH);
   if((this->prevstate == 0 || this->prevstate == 3 || this->prevstate == 4 || this->prevstate == 1) && this->state == 1){
+    stepState = 'R';
+    this->flagP = false;
     controlTime.start();
   }
 }
@@ -153,7 +155,7 @@ void Control::event() {
              {
                 Debug.println("save0");
                 this->time1 = this->time1 + this->time2;
-                this->tmpVal = valcurrent - 1; //guarda valor temp
+                this->tmpVal = valcurrent - 3; //guarda valor temp
                 if (this->tmpVal<=0 || this->tmpVal>=valcurrent)
                   stepState = 'W';
              }
@@ -199,8 +201,8 @@ void Control::event() {
             Debug.println("timeout-agotado");
             this->t1 = 0;
             this->t2 = 0;
-            this->time1 = 30000;
-            this->time2 = 50000;
+            this->time1 = 60000;
+            this->time2 = 90000;
             this->tmpVal = 0;
             this->Ttime0 = Ttime;
             Ttime = this->Ttime0 + (controlTime.ms()*0.001);
@@ -332,7 +334,7 @@ void Control::event() {
   if(this->state == 3)
   {
     if(this->prevstate != 3){
-      this->time1 = 30000;
+      this->time1 = 60000;
       this->tmpVal = 0;
       this->t1 = 0;
       this->t2 = 0;
@@ -386,6 +388,10 @@ void Control::event() {
       if(this->flagTemp != false){
         Debug.println("flagPause");
         this->flagPause = true;
+        this->flagP = false;
+      }
+      else{
+        this->flagP = true;
       }
     }
     if(this->valrampa > 0)
@@ -402,7 +408,7 @@ void Control::event() {
     }
   }
 
-  if(this->prevstate == 2 &&this->state == 2 && this->flagPause !=true){
+  if(this->prevstate == 2 &&this->state == 2 && this->flagPause !=true && this->flagP != true){
     if(valtemp <= minTemp){
       this->state = 1;
       stepState = 'R';
@@ -413,6 +419,7 @@ void Control::event() {
   if(this->prevstate == 2 && (this->state == 1 || this->state == 4))
   {
     controlTime.play();
+    stepState = 'R';
     if(this->state==4)digitalWrite(LedRelay, LOW);
     if(this->state==1)digitalWrite(LedRelay, HIGH);
   }

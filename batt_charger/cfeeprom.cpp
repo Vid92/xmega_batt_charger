@@ -65,7 +65,6 @@ char* IDread(){
 }
 
 char* eepromread(){
-
   char temp[1024];
   memset(temp,0,sizeof(temp));
   Debug.println("temp");
@@ -127,7 +126,7 @@ char* eepromread(){
     unsigned long totalAH = 0;
     unsigned long timeAH = 0;
 
-    for(int i= 0; i<15; i++){
+    for(int i= 0; i<17; i++){
       const char* type0 = root[i]["Type"];
       if(type[0] == '\0'){
         break;
@@ -158,10 +157,10 @@ char* eepromread(){
 }
 
 void clearProgram(){
-  for(int i=0; i< 15;i++){
+  for(int i=0; i< 17;i++){
     memset(&type[i],0,20*sizeof(char));
   }
-  for(int i=0; i< 15;i++){
+  for(int i=0; i< 17;i++){
     duration[i]=0;
     AmperH[i]=0;
     current[i]=0;

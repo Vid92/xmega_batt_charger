@@ -25,9 +25,20 @@ bool flagrun = false;
 bool flagpause = false;
 unsigned long totalTime;
 unsigned long Ttime=0;
-float TempTime1 = 0;
-float TempTime2 = 0;
+unsigned long TempTime1 = 0; //float
+unsigned long TempTime2 = 0;
 
+/*
+int seg = 0;
+//int temSeg = 0;
+int mint = 0;
+int temMin = 0;
+int hor = 0;
+
+//String timehms = ""; //agregar dias !
+String mint0 = "";
+String hor0 = "";
+String seg0 = "";*/
 
 int toID;
 int x = 0;
@@ -62,7 +73,7 @@ int comms_addcbuff(char c){ // Añade a cbuff -----------------------
      cbuff[xbuff]=c; // Añade carácter recibido al Buffer
      xbuff++;
      if(toID!=0)to.stop(toID);
-     toID = to.after(1000, doTimeout); // 115200 - 100  9600- 1000
+     toID = to.after(100, doTimeout); // 115200 - 100  9600- 1000
      break;
   }
 }
@@ -181,10 +192,11 @@ void comms_procesa_comando(void){
 
             if(cbuff[2]==combchar){  //show I,V,T
 
-                TempTime1 = controlTime.ms()*0.001;
+                temSeg = controlTime.ms()*0.001;
                 TempTime2 = Ttime + (controlTime.ms()*0.001);
+                //temSeg = TempTime1;
 
-                String val = String(myaddress) + "VALUE: " "I"+ String(valcurrent)+"," "V" + String(valvoltage)+"," "T" +String(valtemp)+ "," "P"+(count+1)+letter+"," "t"+TempTime1+"," "Tt"+TempTime2+"," "TT" + totalTime+","+ stepState;
+                String val = String(myaddress) + "VALUE: " "I"+ String(valcurrent)+"," "V" + String(valvoltage)+"," "T" +String(valtemp)+ "," "S"+(count+1)+letter+"," "t"+temSeg+"," "Tt"+TempTime2+"," "TT" + totalTime+","+ stepState;
                 //data_crc(val);
 
                 //Debug.println(val);
@@ -202,7 +214,74 @@ void comms_procesa_comando(void){
                 crc16_high = highByte(dato);
                 crc16_low = lowByte(dato);
 
-                digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);  Serial1.write("VALUE: ");Serial1.write("I");Serial1.print(valcurrent); Serial1.write(","); Serial1.write("V"); Serial1.print(valvoltage);Serial1.write(","); Serial1.write("T"); Serial1.print(valtemp);Serial1.write(",");Serial1.write("P"); Serial1.print(count+1);Serial1.print(letter); Serial1.write(","); Serial1.write("t"); Serial1.print(TempTime1);Serial1.write(",");Serial1.write("Tt"); Serial1.print(TempTime2); Serial1.write(","); Serial1.write("TT"); Serial1.print(totalTime); Serial1.write(","); Serial1.print(stepState); Serial1.write(3); Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+                //temSeg = TempTime1;
+                /*
+                if(temSeg > 3599){
+                  hor = temSeg / 3600; // horas
+                  temMin = temSeg - (hor * 3600);
+                  hor0 = String(hor)+":";
+                  if (temMin > 59){
+                    mint = temMin / 60; //minutos
+                    seg = temMin - (mint * 60); //segundos
+                    if(seg<10){
+                      seg0 = "0"+String(seg);
+                    }
+                    else{
+                      seg0 = String(seg);
+                    }
+                    if(mint<10){
+                      mint0 = "0"+String(mint)+":";
+                    }
+                    else{
+                      mint0 = String(mint)+":";
+                    }
+                  }
+                  else{
+                    seg = temMin;
+                    if(seg<10){
+                      seg0 = "0"+String(seg);
+                    }
+                    else{
+                      seg0 = String(seg);
+                    }
+                  }
+                }
+                else if (temSeg > 59){
+                  mint = temSeg / 60; //minutos
+                  seg = temSeg - (mint * 60); //segundos
+
+                  if (seg<10){
+                    seg0 = "0"+String(seg);
+                  }
+                  else{
+                    seg0 = String(seg);
+                  }
+
+                  if(mint<10){
+                    mint0 = "0"+String(mint)+":";
+                  }
+                  else{
+                    mint0 = String(mint)+":";
+                  }
+                  hor0 = "00:";
+                }
+                else if(temSeg < 59){
+                  seg = temSeg;
+                  if (seg < 10){
+                    seg0 = "0"+String(seg);
+                  }
+                  else{
+                    seg0 = String(seg);
+                  }
+                  mint0 = "00:";
+                  hor0 = "00:";
+                }
+
+                timehms = hor0+mint0+seg0;*/
+                //Debug.print("timehms:");
+                //Debug.println(timehms);
+
+                digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);  Serial1.write("VALUE: ");Serial1.write("I");Serial1.print(valcurrent); Serial1.write(","); Serial1.write("V"); Serial1.print(valvoltage);Serial1.write(","); Serial1.write("T"); Serial1.print(valtemp);Serial1.write(",");Serial1.write("S"); Serial1.print(count+1);Serial1.print(letter); Serial1.write(","); Serial1.write("t"); Serial1.print(timehms);Serial1.write(",");Serial1.write("Tt"); Serial1.print(TempTime2); Serial1.write(","); Serial1.write("TT"); Serial1.print(totalTime); Serial1.write(","); Serial1.print(stepState);Serial1.write(3); Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
             }
 
             if(cbuff[2]==writechar){  //writting eeprom Json
@@ -278,7 +357,7 @@ void comms_procesa_comando(void){
           {
             Debug.println("invalido-Address");
           }
-          
+
       }
       else
       {

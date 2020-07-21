@@ -14,8 +14,22 @@ bool flagbuff = false;
 bool flagStep=false;
 bool flagtime=true;
 int count = 0;
-char letter = 0x49; //I
+String letter = "I"; //0x49; //I char
 char stepState = 0x49;
+
+String timehms="00:00:00";
+
+int seg = 0;
+int temSeg = 0;
+int mint = 0;
+int temMin = 0;
+int hor = 0;
+
+//String timehms = ""; //agregar dias !
+String mint0 = "";
+String hor0 = "";
+String seg0 = "";
+
 //int i=0;
 //int state0 = 0;
 //int prevstate0 = 0;
@@ -36,18 +50,18 @@ int LedComms = 17;
 int LedRelay = 20;
 
 char anbu[1024];  //cfg json
-char type[15][20]; //inicio, pausa,carga, fin
-unsigned long duration[15]; //time
-float AmperH[15];
-float current[15];
-float maxtemp[15];
-float mintemp[15];
+char type[17][20]; //inicio, pausa,carga, fin
+unsigned long duration[17]; //time
+float AmperH[17];
+float current[17];
+float maxtemp[17];
+float mintemp[17];
 
 void setup()
 {
   //baudios
-  Debug.begin(9600);
-  Serial1.begin(9600);
+  Debug.begin(115200);
+  Serial1.begin(115200);
   Wire.begin();
   control.begin();
 
@@ -90,20 +104,79 @@ void loop()
 
 void printMessage()
 {
-    Debug.print("millis() : ");
-    Debug.print(millis());
+    temSeg = controlTime.ms()*0.001;
+    if(temSeg > 3599){
+      hor = temSeg / 3600; // horas
+      temMin = temSeg - (hor * 3600);
+      hor0 = String(hor)+":";
+      if (temMin > 59){
+        mint = temMin / 60; //minutos
+        seg = temMin - (mint * 60); //segundos
+        if(seg<10){
+          seg0 = "0"+String(seg);
+        }
+        else{
+          seg0 = String(seg);
+        }
+        if(mint<10){
+          mint0 = "0"+String(mint)+":";
+        }
+        else{
+          mint0 = String(mint)+":";
+        }
+      }
+      else{
+        seg = temMin;
+        if(seg<10){
+          seg0 = "0"+String(seg);
+        }
+        else{
+          seg0 = String(seg);
+        }
+      }
+    }
+    else if (temSeg > 59){
+      mint = temSeg / 60; //minutos
+      seg = temSeg - (mint * 60); //segundos
+
+      if (seg<10){
+        seg0 = "0"+String(seg);
+      }
+      else{
+        seg0 = String(seg);
+      }
+      if(mint<10){
+        mint0 = "0"+String(mint)+":";
+      }
+      else{
+        mint0 = String(mint)+":";
+      }
+      hor0 = "00:";
+    }
+    else if(temSeg < 59){
+      seg = temSeg;
+      if (seg < 10){
+        seg0 = "0"+String(seg);
+      }
+      else{
+        seg0 = String(seg);
+      }
+      mint0 = "00:";
+      hor0 = "00:";
+    }
+    timehms = hor0+mint0+seg0;
+
+
+    Debug.print("time: ");
+    Debug.print(timehms);
+    //Debug.print(", temSeg: ");
+    //Debug.print(temSeg);
     Debug.print(", stopwatch : ");
     Debug.print(controlTime.ms()*0.001);
     Debug.print(", Ttime : ");
     Debug.print(Ttime);
     Debug.print(", AH : ");
     Debug.println(valAH);
-    Debug.print(", tmp :");
-    Debug.println(valtemp);
-    //Debug.print(", current : ");
-    //Debug.println(valcurrent);
-    //Debug.print(", state :");
-    //Debug.println(stepState);
 }
 
 void serialEvent1()

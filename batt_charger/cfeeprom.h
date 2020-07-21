@@ -9,12 +9,12 @@
 
 extern char anbu[1024];
 extern char add[0];
-extern char type[15][20];
-extern unsigned long duration[15];
-extern float AmperH[15];
-extern float current[15];
-extern float maxtemp[15];
-extern float mintemp[15];
+extern char type[17][20];
+extern unsigned long duration[17];
+extern float AmperH[17];
+extern float current[17];
+extern float maxtemp[17];
+extern float mintemp[17];
 extern unsigned int myaddress;
 extern unsigned long totalTime;
 

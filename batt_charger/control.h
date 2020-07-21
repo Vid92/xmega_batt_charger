@@ -31,13 +31,14 @@ class Control
   bool flagTemp = false;
   bool flagPause = false;
   bool flagEnable = false;
+  bool flagP = false;
 
   unsigned long timeout = 0;
   unsigned long steptime = 0;
   unsigned long Ttime0 = 0;
 
-  unsigned long time1 = 30000; //ms ->60seg-1min
-  unsigned long time2 = 50000;
+  unsigned long time1 = 60000; //ms ->60seg-1min
+  unsigned long time2 = 90000; //1.5 min
   unsigned long t1 = 0;
   unsigned long t2 = 0;
   unsigned long timeAH = 0;
