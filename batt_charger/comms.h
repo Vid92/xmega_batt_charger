@@ -14,12 +14,16 @@ extern bool flagtime;
 extern Program program;
 extern Timer to;
 
+//extern const char* timehms;
 extern String timehms;
 extern int temSeg;
+
 
 void comms_inicbuff(void);        // Borra buffer
 int comms_addcbuff(char c);       // añade carácter recibido al buffer
 void comms_procesa_comando(void); // Procesa comando
+int aux_crc(String val);
 
+const char* aux_time(void);
 
 #endif

@@ -14,17 +14,17 @@ extern int LedRelay;
 extern unsigned long Ttime;
 extern char stepState;
 extern float valAH;
+extern float totAH;
 
 class Control
 {
   public:
 
   xmDAC dac=xmDAC(xmDAC::DAC_PORT_B);
-  float val_control = 0;
-  float maxTemp = 0;
-  float minTemp = 0;
-  float valAmpHour = 0;
-  //float valAH = 0;
+  float val_control = 0.0;
+  float maxTemp = 0.0;
+  float minTemp = 0.0;
+  float valAmpHour = 0.0;
 
   bool flagS = false;
   bool flagO = false;
@@ -50,11 +50,11 @@ class Control
   long averageVoltage = 0;
   long averageTemp  = 0;
 
-  double tmpVal = 0;
-  double valcurrent0 = 0;
-  double valvoltage0 = 0;
-  double valtemp0 = 0;
-  double valAmpHour0 = 0;
+  double tmpVal = 0.0;
+  double valcurrent0 = 0.0;
+  double valvoltage0 = 0.0;
+  double valtemp0 = 0.0;
+  double valAmpHour0 = 0.0;
 
   void begin();
   void setCurrent(float val_control);

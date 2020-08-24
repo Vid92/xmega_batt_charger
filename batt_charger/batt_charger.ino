@@ -14,10 +14,11 @@ bool flagbuff = false;
 bool flagStep=false;
 bool flagtime=true;
 int count = 0;
-String letter = "I"; //0x49; //I char
+const char* letter = "Off"; //0x49; //I char
 char stepState = 0x49;
 
-String timehms="00:00:00";
+//const char* timehms = "00:00:00";
+String timehms = "00:00:00";
 
 int seg = 0;
 int temSeg = 0;
@@ -25,7 +26,6 @@ int mint = 0;
 int temMin = 0;
 int hor = 0;
 
-//String timehms = ""; //agregar dias !
 String mint0 = "";
 String hor0 = "";
 String seg0 = "";
@@ -34,10 +34,10 @@ String seg0 = "";
 //int state0 = 0;
 //int prevstate0 = 0;
 
-double valcurrent = 0; //solo para mostrar
-double valvoltage = 0;
-double valtemp = 0;
-float valAH = 0;
+double valcurrent = 0.0; //solo para mostrar
+double valvoltage = 0.0;
+double valtemp = 0.0;
+float valAH = 0.0;
 
 StopWatch controlTime;
 Control control;
@@ -50,8 +50,8 @@ int LedComms = 17;
 int LedRelay = 20;
 
 char anbu[1024];  //cfg json
-char type[17][20]; //inicio, pausa,carga, fin
-unsigned long duration[17]; //time
+char type[17][10]; //inicio, pausa,carga, fin
+float duration[17]; //time
 float AmperH[17];
 float current[17];
 float maxtemp[17];
@@ -74,17 +74,19 @@ void setup()
   digitalWrite(LedRelay, LOW);
 
   myaddress = readEEPROM(disk2, address);
-
   writeEEPROM(disk1, address,myaddress);
 
   clearProgram();
   loadProgram();
+
+  //delay(3000);
 
   t.every(1000,printMessage); //mostrar valores
 }
 
 void loop()
 {
+
   if(flagcommand)comms_procesa_comando();
 
   t.update();
@@ -140,7 +142,7 @@ void printMessage()
       seg = temSeg - (mint * 60); //segundos
 
       if (seg<10){
-        seg0 = "0"+String(seg);
+        seg0 = "0"+ String(seg);
       }
       else{
         seg0 = String(seg);
@@ -164,13 +166,22 @@ void printMessage()
       mint0 = "00:";
       hor0 = "00:";
     }
-    timehms = hor0+mint0+seg0;
+      /*char bf[3]={0};
+      char bfm[4]={0};
+      char bfh[4]={0};
+      seg0.toCharArray(bf,3);
+      mint0.toCharArray(bfm,4);
+      hor0.toCharArray(bfh,4);
+     char buf[11] = {0};
+     strcat(buf,bfh);
+     strcat(buf,bfm);
+     strcat(buf,bf);
+     timehms = buf;*/
 
+    timehms = hor0+mint0+seg0;
 
     Debug.print("time: ");
     Debug.print(timehms);
-    //Debug.print(", temSeg: ");
-    //Debug.print(temSeg);
     Debug.print(", stopwatch : ");
     Debug.print(controlTime.ms()*0.001);
     Debug.print(", Ttime : ");

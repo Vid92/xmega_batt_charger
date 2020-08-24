@@ -9,14 +9,14 @@
 
 extern char anbu[1024];
 extern char add[0];
-extern char type[17][20];
-extern unsigned long duration[17];
+extern char type[17][10];
+extern float duration[17]; //unsigned long
 extern float AmperH[17];
 extern float current[17];
 extern float maxtemp[17];
 extern float mintemp[17];
 extern unsigned int myaddress;
-extern unsigned long totalTime;
+extern float totalTime;
 
 extern bool flagload;
 extern int LedComms;
@@ -24,15 +24,19 @@ extern int LedComms;
 extern int disk1;
 extern int disk2;
 extern bool flagpause;
-extern int x;
+extern int save;
+extern int read;
 
 void eepromsave(char* anbu);
+void jsonSave(char* buffer);
+void jsonOrigenSave(char* json);
 //void writeAddress(char* add);
 char* IDread(void);
-char* eepromread(void);
+void eepromread(void);
 //char* readAddress(void);
 void clearProgram(void);
 void loadProgram(void);
+void cleanEeprom(void);
 //extern char data_crc(String val);
 
 #endif

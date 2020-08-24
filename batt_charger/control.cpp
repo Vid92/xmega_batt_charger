@@ -45,12 +45,14 @@ void Control::run() {
     stepState = 'R';
     this->flagP = false;
     controlTime.start();
+    //Debug.println("RUN");
   }
 }
 
 void Control::pause() {
   this->state = 2;
   this->flagEnable = true;
+  //Debug.println("PAUSE");
 }
 
 void Control::stop() {
@@ -94,29 +96,25 @@ void Control::readData(){
   this->averageVoltage = 0;
   this->averageTemp  = 0;
 
-  for(int i = 0; i < 40; i++)
+  for(int i = 0; i < 70; i++) //promedio Current,Voltage,Temperature //40
   {
     this->averageCurrent = this->averageCurrent + analogRead(A0);
     this->averageVoltage = this->averageVoltage + analogRead(A1);
     this->averageTemp = this->averageTemp + analogRead(A2);
   }
-  this->averageCurrent = this->averageCurrent / 40;
-  this->averageVoltage = this->averageVoltage / 40;
-  this->averageTemp = this->averageTemp / 40;
+  this->averageCurrent = this->averageCurrent / 70;//40
+  this->averageVoltage = this->averageVoltage / 70;
+  this->averageTemp = this->averageTemp / 70;
 
   this->valcurrent0 = this->averageCurrent - 70.0; //36
   valcurrent = this->valcurrent0 * 35.0 / 1023.0;
 
   valAH = valcurrent * 0.000277 * controlTime.ms() * 0.001;
 
-  //Debug.println(this->averageVoltage);
   this->valvoltage0 = this->averageVoltage - 44.0;
   valvoltage = this->valvoltage0 * 500.0 / 1023.0;
 
-  //Debug.println(this->valvoltage0);
   valtemp = this->averageTemp * 120.0 / 1023.0;
-  //Debug.print("readTemp:");
-  //Debug.println(valtemp);
   delay(1);
 }
 
@@ -127,7 +125,6 @@ void Control::event() {
       if(controlTime.isRunning())//Program running
       {
         if(this->timeout!=0){ //Running with time
-          //Debug.print("TIMEOUT");
           if(controlTime.ms() < this->timeout)
           {
               if(this->flagTemp != false){
@@ -155,7 +152,7 @@ void Control::event() {
              {
                 Debug.println("save0");
                 this->time1 = this->time1 + this->time2;
-                this->tmpVal = valcurrent - 3; //guarda valor temp
+                this->tmpVal = valcurrent - 7; //guarda valor temp 3
                 if (this->tmpVal<=0 || this->tmpVal>=valcurrent)
                   stepState = 'W';
              }
@@ -182,8 +179,7 @@ void Control::event() {
                }
                else if(controlTime.ms() > this->t1 && this->flagO != false){
                  this->flagS = true;
-                 Debug.print("ElseTime:");
-                 Debug.println(controlTime.ms());
+                 //Debug.print("ElseTime:");
                }
              }
              //----------------- control temp -------------------//
@@ -206,20 +202,21 @@ void Control::event() {
             this->tmpVal = 0;
             this->Ttime0 = Ttime;
             Ttime = this->Ttime0 + (controlTime.ms()*0.001);
+            totAH = totAH + valAH;
             controlTime.stop();
             flagStep=true;
           }
         }
         else
         {
-          //running with Amp-hour  //Debug.print("AH");
+          //running with Amp-hour
           if(valAH < this->valAmpHour)
           {
              if(this->flagTemp != false){
                this->flagTemp = false;
                this->t2 = controlTime.ms() + 30000;
-               Debug.print("t2:");
-               Debug.println(this->t2);
+               //Debug.print("t2:");
+               //Debug.println(this->t2);
              }
              //-------------- control current ---------------//
              if(valcurrent < this->val_control)
@@ -241,7 +238,7 @@ void Control::event() {
              {
                Debug.print("save1");
                this->time1 = this->time1 + this->time2;
-               this->tmpVal = valcurrent - 1; //guarda valor temp
+               this->tmpVal = valcurrent - 7; //guarda valor temp
                if (this->tmpVal<=0 || this->tmpVal>=valcurrent)
                  stepState = 'W';
              }
@@ -249,11 +246,11 @@ void Control::event() {
              if(this->tmpVal<=0 && controlTime.ms() > this->time2 && controlTime.ms() > this->t2)
              {
                this->flagO = true;
-               Debug.print("tmval1");
+               //Debug.print("tmval1");
                if (this->flagO !=false){
                  stepState = 'W';
                  this->flagS = true; //flag manda a state = Stop
-                 Debug.println("dentro2");
+                 //Debug.println("dentro2");
                }
              }
 
@@ -263,13 +260,11 @@ void Control::event() {
                  stepState = 'W';
                  this->flagO = true;
                  this->t1 = controlTime.ms() + 20000;
-                 Debug.print("T1me2:");
-                 Debug.println(this->t1);
+                 //Debug.print("T1me2:");
+                 //Debug.println(this->t1);
                }
                else if(controlTime.ms() > this->t1 && this->flagO != false){
                  this->flagS = true;
-                 Debug.print("ElseTime2:");
-                 Debug.println(controlTime.ms());
                }
              }
 
@@ -293,6 +288,7 @@ void Control::event() {
             this->tmpVal = 0;
             this->Ttime0 = Ttime;
             Ttime = this->Ttime0 + (controlTime.ms()*0.001);
+            totAH = totAH + valAH;
             controlTime.stop();
             flagStep=true;
           }
@@ -306,7 +302,6 @@ void Control::event() {
     {
       if(controlTime.ms() > this->steptime)
       {
-        //Debug.print("controlTime: "); Debug.println(controlTime.ms());
         Debug.println("stepPause out");
         flagStep=true;
         this->Ttime0 = Ttime;
@@ -315,21 +310,6 @@ void Control::event() {
     }
       delay(1);
   }
-
-  /*
-  if(this->prevstate!=3 && this->state == 3)
-  {
-    Debug.println("STOP");
-    controlTime.stop();
-    while(this->valrampa > 0)
-    {
-      this->valrampa--;
-      dac.write(0xFFF-this->valrampa);
-      delay(1);
-    }
-    digitalWrite(LedRelay, LOW);
-    stepState = 'S';
-  }*/
 
   if(this->state == 3)
   {
@@ -365,20 +345,6 @@ void Control::event() {
       digitalWrite(LED_BUILTIN, LOW);
     }
   }
-
-  /*if(this->prevstate!= 2 && this->state == 2)
-  {
-     Debug.println("PAUSE");
-     controlTime.pause();
-      while(this->valrampa > 0)
-      {
-        this->valrampa--;
-        dac.write(0xFFF-this->valrampa);
-        delay(1);
-      }
-      digitalWrite(LedRelay, LOW); //solo digitalWrite
-      stepState = 'P';
-  }*/
 
   if(this->state == 2 && this->flagEnable !=false)
   {

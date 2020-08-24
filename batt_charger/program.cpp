@@ -6,7 +6,7 @@ void Program::runStep(){
   this->state0 = 1;
   //state0 = 1;
   //stepState = 'R';
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_BUILTIN, HIGH); //E1
 
   digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(51); Serial1.write("ACTION: PASS,RUN"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
   Ttime=0;
@@ -33,7 +33,7 @@ void Program::nextStep(){
   //state0 = 1;
   count = count + 1;
 
-  if(count>14) count = 0;
+  if(count>16) count = 0;
 }
 
 void Program::process_step()
@@ -52,7 +52,7 @@ void Program::process_step()
       break;
 
       case 'C':  //Charge
-      letter = "CH"; //C
+      letter = "Charge"; //C
       Debug.println("Step-Charge");
       control.setCurrent(current[count]);
       control.setTime(duration[count]);
@@ -62,14 +62,16 @@ void Program::process_step()
       break;
 
       case 'P':  //Pause
-      letter = "PAU";
+      letter = "Pause";
       Debug.println("Step-Pause");
       control.stepPause(duration[count]);
       control.runPause();
       break;
 
       case 'E':  //End
-      letter = "END";
+      letter = "End";
+      Ttime = 0;
+      totAH = 0.0;
       control.stop();
       stepState = 'E';
       Debug.println("Step-End");
@@ -90,7 +92,8 @@ void Program::process_step()
     control.stop();
     Ttime=0;
     count = 0;
-    letter = "I";
+    totAH = 0.0;
+    letter = "Off";
   }
 
   if(this->prevstate0!= 2 && this->state0 == 2)
