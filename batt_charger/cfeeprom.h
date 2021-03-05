@@ -17,6 +17,8 @@ extern float maxtemp[17];
 extern float mintemp[17];
 extern unsigned int myaddress;
 extern float totalTime;
+extern String totalhms;
+extern String nameProg;
 
 extern bool flagload;
 extern int LedComms;
@@ -29,7 +31,7 @@ extern int read;
 
 void eepromsave(char* anbu);
 void jsonSave(char* buffer);
-void jsonOrigenSave(char* json);
+//void jsonOrigenSave(char* json);
 //void writeAddress(char* add);
 char* IDread(void);
 void eepromread(void);
@@ -37,6 +39,6 @@ void eepromread(void);
 void clearProgram(void);
 void loadProgram(void);
 void cleanEeprom(void);
-//extern char data_crc(String val);
+//int aux_crc(String val);
 
 #endif

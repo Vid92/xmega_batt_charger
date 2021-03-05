@@ -24,9 +24,11 @@ bool flagload = false;
 bool flagrun = false;
 bool flagpause = false;
 float totalTime;
-unsigned long Ttime = 0; //variable acum.tiempo
-float TempTime1 = 0; //float
-float TempTime2 = 0; //unsigned long
+String totalhms; //total time formato "00:00:00"
+
+//unsigned long Ttime = 0; //variable acum.tiempo
+float TempTime1 = 0; // aux AH acumulado
+//float TempTime2 = 0; //unsigned long
 float totAH = 0.0;   //variable acum.AH
 
 int toID;
@@ -64,7 +66,7 @@ int comms_addcbuff(char c){ // Añade a cbuff
       if(toID!=0)to.stop(toID);
       break;
     default:
-     cbuff[xbuff]=c; // Añade carácter recibido al Buffer
+     cbuff[xbuff]=c;       // Añade carácter recibido al Buffer
      xbuff++;
      if(toID!=0)to.stop(toID);
      toID = to.after(100, doTimeout); // 115200 - 100  9600- 1000
@@ -80,39 +82,22 @@ void doTimeout(){
     comms_inicbuff();
   }
 }
-//------------------------------- calculo crc ---------------------------------//
-int aux_crc(String val){
-  char bffer[1024] = {0};
-  strcpy(bffer,val.c_str());
 
-  int lenbff = 0;
-  unsigned char tmp_crc[1024]={0};
-  for(int i=0;i<val.length();i++)
-  {
-      tmp_crc[i]=bffer[i];
-      lenbff++;
-  }
-  int dato = crc16_SingleBuf(tmp_crc,lenbff);
-  return dato;
-}
 //---------------------------- Procesa comando -------------------------------//
 void comms_procesa_comando(void){
 
-  char arg[lenbuff]; // Argumento de comando (si lo tiene)
-  flagcommand=false; // Desactivo flag de comando pendiente.
+  char arg[lenbuff];  // Argumento de comando (si lo tiene)
+  flagcommand=false;  // Desactivo flag de comando pendiente.
   flagbuff =false;
 
   for(int i=0;i<lenbuff;i++){ // Bucle que pone a 0 todos los
-    arg[i]=0x00;  //caracteres en el argumento
+    arg[i]=0x00;      //caracteres en el argumento
   }
     int len =0;
     if(cbuff[0]==beginchar&&cbuff[xbuff-4]==0x03&&cbuff[xbuff-1]==endchar){
-
      unsigned char tbuff[lenbuff]={0}; //1024
-
       char crc16_high;
       char crc16_low;
-
       int n=3;
       for(int x=n;; x++){
         if(cbuff[x]==0x03)break;
@@ -127,6 +112,7 @@ void comms_procesa_comando(void){
         crc16_low = lowByte(dato);
       }
 
+      //----------------------------- validacion CRC ------------------------------//
       if(cbuff[xbuff-3]==crc16_low && cbuff[xbuff-2]==crc16_high) //validacion CRC
       {
         Debug.println("valido crc");
@@ -138,7 +124,6 @@ void comms_procesa_comando(void){
 
               String val = String(myaddress)+"ACTION: PASS";
               //int dato0 = aux_crc(val);
-
               char bffer[1024] = {0};
               strcpy(bffer,val.c_str());
 
@@ -157,25 +142,13 @@ void comms_procesa_comando(void){
             }
 
             if(cbuff[2]==runchar){  //run
-
                 if(!flagload){Debug.println("cargo");clearProgram();loadProgram();}
                 if(flagload){
                   flagrun = true; flagpause = false;
                   program.runStep();
-
-                  /*String val = String(myaddress)+"ACTION: PASS,RUN";
-                  int dato0 = aux_crc(val);
-                  crc16_high = highByte(dato0);
-                  crc16_low = lowByte(dato0);
-                  digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(51); Serial1.write("ACTION: PASS,RUN"); Serial1.write(3); Serial1.write(crc16_low);Serial1.write(crc16_high); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
-                  */
                 }
                 else
                 {
-                  /*String val = String(myaddress)+"ACTION: FAIL,RUN";
-                  int dato0 = aux_crc(val);
-                  crc16_high = highByte(dato0);
-                  crc16_low = lowByte(dato0);*/
                   digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(51); Serial1.write("ACTION: FAIL,RUN"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
                 }
             }
@@ -184,19 +157,9 @@ void comms_procesa_comando(void){
                 if(flagrun){
                   flagpause = true; flagrun=false;
                   program.pauseStep();
-                  /*String val = String(myaddress)+"ACTION: PASS,PAUSE";
-                  int dato0 = aux_crc(val);
-                  crc16_high = highByte(dato0);
-                  crc16_low = lowByte(dato0);
-                  digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(51); Serial1.write("ACTION: PASS,PAUSE"); Serial1.write(3); Serial1.write(crc16_low);Serial1.write(crc16_high); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
-                  */
                 }
                 else
                 {
-                  /*String val = String(myaddress)+"ACTION: FAIL,PAUSE";
-                  int dato0 = aux_crc(val);
-                  crc16_high = highByte(dato0);
-                  crc16_low = lowByte(dato0);*/
                   digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(52); Serial1.write("ACTION: FAIL,PAUSE"); Serial1.write(3); Serial1.write(0);Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
                 }
             }
@@ -204,31 +167,18 @@ void comms_procesa_comando(void){
             if(cbuff[2]==stopchar){ //stop
                 if(flagpause||flagrun){
                   program.stopStep();
-                  /*String val = String(myaddress)+"ACTION: PASS,STOP";
-                  int dato0 = aux_crc(val);
-                  crc16_high = highByte(dato0);
-                  crc16_low = lowByte(dato0);
-                  digitalWrite(LedComms, HIGH);Serial1.write(2); Serial1.print(myaddress); Serial1.write(53); Serial1.write("ACTION: PASS,STOP"); Serial1.write(3); Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
-                  */
                 }
                 if(!flagpause&&!flagrun)
                 {
-                  /*String val = String(myaddress)+"ACTION: FAIL,STOP";
-                  int dato0 = aux_crc(val);
-                  crc16_high = highByte(dato0);
-                  crc16_low = lowByte(dato0);*/
                   digitalWrite(LedComms, HIGH);Serial1.write(2);Serial1.print(myaddress); Serial1.write(53); Serial1.write("ACTION: FAIL,STOP"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
                 }
             }
 
             if(cbuff[2]==combchar){  //show I,V,T
-                //temSeg = controlTime.ms()*0.001;
-
-                TempTime2 = Ttime + (controlTime.ms()*0.001);
+                //TempTime2 = Ttime + (controlTime.ms()*0.001);
                 TempTime1 = totAH + valAH;
-                //timehms = "00:00:00";
 
-                String val = String(myaddress) + "VALUE: " "I"+ String(valcurrent)+"," "V" + String(valvoltage)+"," "T" +String(valtemp)+"," "AH"+String(valAH)+"," "AC"+String(TempTime1)+"," "P"+(count+1)+"," "S"+letter+"," "t"+timehms+"," "Tt"+TempTime2+"," "TT" +totalTime+","+ stepState;
+                String val = String(myaddress) + "VALUE: " "I"+ String(valcurrent)+"," "V" + String(valvoltage)+"," "T" +String(valtemp)+"," "AH"+String(valAH)+"," "AC"+String(TempTime1)+"," "P"+(count)+"," "S"+letter+"," "t"+timehms+"," "Tt"+timehmsa+"," "TT" +totalhms+"," "N"+nameProg+","+stepState;
 
                 char bffer[1024] = {0};
                 strcpy(bffer,val.c_str());
@@ -245,11 +195,11 @@ void comms_procesa_comando(void){
                 crc16_high = highByte(dato);
                 crc16_low = lowByte(dato);
 
-                digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);  Serial1.write("VALUE: ");Serial1.write("I");Serial1.print(valcurrent); Serial1.write(","); Serial1.write("V"); Serial1.print(valvoltage);Serial1.write(","); Serial1.write("T"); Serial1.print(valtemp);Serial1.write(",");Serial1.write("AH");Serial1.print(valAH);Serial1.write(",");Serial1.write("AC");Serial1.print(TempTime1);Serial1.write(",");Serial1.write("P"); Serial1.print(count+1);Serial1.write(",");Serial1.write("S");Serial1.write(letter);Serial1.write(","); Serial1.write("t"); Serial1.print(timehms);Serial1.write(",");Serial1.write("Tt"); Serial1.print(TempTime2); Serial1.write(","); Serial1.write("TT"); Serial1.print(totalTime); Serial1.write(","); Serial1.print(stepState);Serial1.write(3); Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+                digitalWrite(LedComms, HIGH); Serial1.write(2);Serial1.print(myaddress);  Serial1.write("VALUE: ");Serial1.write("I");Serial1.print(valcurrent); Serial1.write(","); Serial1.write("V"); Serial1.print(valvoltage);Serial1.write(","); Serial1.write("T"); Serial1.print(valtemp);Serial1.write(",");Serial1.write("AH");Serial1.print(valAH);Serial1.write(",");Serial1.write("AC");Serial1.print(TempTime1);Serial1.write(",");Serial1.write("P"); Serial1.print(count);Serial1.write(",");Serial1.write("S");Serial1.write(letter);Serial1.write(","); Serial1.write("t"); Serial1.print(timehms);Serial1.write(",");Serial1.write("Tt"); Serial1.print(timehmsa); Serial1.write(","); Serial1.write("TT"); Serial1.print(totalhms); Serial1.write(",");Serial1.write("N"); Serial1.print(nameProg); Serial1.write(","); Serial1.print(stepState);Serial1.write(3); Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
             }
 
             if(cbuff[2]==writechar){  //writting eeprom Json
-              if(cbuff[3]==0x5B){ //OJO!! 28 0x6B = [
+              if(cbuff[8]==0x5B){ //3  OJO!! 28 0x6B = [
                   int i=3;
                   char tmp[lenbuff]={0};
                   do{ // Extraemos argumento del buffer
@@ -257,7 +207,7 @@ void comms_procesa_comando(void){
                   }while(cbuff[++i]!=0x03);
                   Debug.println("writingEEPROM");
 
-                  cleanEeprom();
+                  //cleanEeprom(); //--*
                   eepromsave(tmp);
                   flagload = false;
                   //Debug.println(len);
@@ -269,18 +219,10 @@ void comms_procesa_comando(void){
                     //jsonOrigenSave(tmp);
                     //if (save == read){
                     if(flagload){
-                      String val = String(myaddress) + String(writechar)+ "ACTION: PASS";
-                      /*int dato0 = aux_crc(val);
-                      crc16_high = highByte(dato0);
-                      crc16_low = lowByte(dato0);*/
-                      digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
+                      digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: PASS"); Serial1.write(3); Serial1.write(0); Serial1.write(0); Serial1.write(4); delay(2); digitalWrite(LedComms, LOW);
                     }
                     else{
-                      String val = String(myaddress)+String(writechar)+"ACTION: FAIL";
-                      /*int dato0 = aux_crc(val);
-                      crc16_high = highByte(dato0);
-                      crc16_low = lowByte(dato0);*/
-                      digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: FAIL"); Serial1.write(3);Serial1.write(crc16_low); Serial1.write(crc16_high); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
+                      digitalWrite(LedComms, HIGH); Serial1.write(2); Serial1.print(myaddress); Serial1.write(writechar); Serial1.write("ACTION: FAIL"); Serial1.write(3);Serial1.write(0); Serial1.write(0); Serial1.write(4);delay(2); digitalWrite(LedComms, LOW);
                     }
                   }
               }

@@ -19,9 +19,15 @@ char stepState = 0x49;
 
 //const char* timehms = "00:00:00";
 String timehms = "00:00:00";
+String timehmsa = "00:00:00";
+String nameProg= "";
+
+unsigned long Ttime = 0;
+unsigned long timeC = 0;
+unsigned long timeAc = 0;
 
 int seg = 0;
-int temSeg = 0;
+
 int mint = 0;
 int temMin = 0;
 int hor = 0;
@@ -29,10 +35,6 @@ int hor = 0;
 String mint0 = "";
 String hor0 = "";
 String seg0 = "";
-
-//int i=0;
-//int state0 = 0;
-//int prevstate0 = 0;
 
 double valcurrent = 0.0; //solo para mostrar
 double valvoltage = 0.0;
@@ -60,7 +62,7 @@ float mintemp[17];
 void setup()
 {
   //baudios
-  Debug.begin(115200);
+  Debug.begin(115200); //115200
   Serial1.begin(115200);
   Wire.begin();
   control.begin();
@@ -80,22 +82,18 @@ void setup()
   loadProgram();
 
   //delay(3000);
-
   t.every(1000,printMessage); //mostrar valores
 }
 
 void loop()
 {
-
   if(flagcommand)comms_procesa_comando();
-
   t.update();
   to.update();
 
   control.readData();
   program.process_step();
   control.event();
-
 
   if(flagStep)
   {
@@ -106,79 +104,11 @@ void loop()
 
 void printMessage()
 {
-    temSeg = controlTime.ms()*0.001;
-    if(temSeg > 3599){
-      hor = temSeg / 3600; // horas
-      temMin = temSeg - (hor * 3600);
-      hor0 = String(hor)+":";
-      if (temMin > 59){
-        mint = temMin / 60; //minutos
-        seg = temMin - (mint * 60); //segundos
-        if(seg<10){
-          seg0 = "0"+String(seg);
-        }
-        else{
-          seg0 = String(seg);
-        }
-        if(mint<10){
-          mint0 = "0"+String(mint)+":";
-        }
-        else{
-          mint0 = String(mint)+":";
-        }
-      }
-      else{
-        seg = temMin;
-        if(seg<10){
-          seg0 = "0"+String(seg);
-        }
-        else{
-          seg0 = String(seg);
-        }
-      }
-    }
-    else if (temSeg > 59){
-      mint = temSeg / 60; //minutos
-      seg = temSeg - (mint * 60); //segundos
+    timeC = controlTime.ms()*0.001;
+    timehms = currentTime(timeC);
 
-      if (seg<10){
-        seg0 = "0"+ String(seg);
-      }
-      else{
-        seg0 = String(seg);
-      }
-      if(mint<10){
-        mint0 = "0"+String(mint)+":";
-      }
-      else{
-        mint0 = String(mint)+":";
-      }
-      hor0 = "00:";
-    }
-    else if(temSeg < 59){
-      seg = temSeg;
-      if (seg < 10){
-        seg0 = "0"+String(seg);
-      }
-      else{
-        seg0 = String(seg);
-      }
-      mint0 = "00:";
-      hor0 = "00:";
-    }
-      /*char bf[3]={0};
-      char bfm[4]={0};
-      char bfh[4]={0};
-      seg0.toCharArray(bf,3);
-      mint0.toCharArray(bfm,4);
-      hor0.toCharArray(bfh,4);
-     char buf[11] = {0};
-     strcat(buf,bfh);
-     strcat(buf,bfm);
-     strcat(buf,bf);
-     timehms = buf;*/
-
-    timehms = hor0+mint0+seg0;
+    timeAc = Ttime + (controlTime.ms()*0.001);
+    timehmsa = currentTime(timeAc);
 
     Debug.print("time: ");
     Debug.print(timehms);
@@ -189,16 +119,79 @@ void printMessage()
     Debug.print(", AH : ");
     Debug.println(valAH);
 }
-
-void serialEvent1()
-{    // Interrupción recepción serie USART
-    flagbuff = false;
-    rcvchar=0x00;        // Inicializo carácter recibido
-    //Debug.println("EventoSerial");
-
-    while(Serial1.available()){         // Si hay algo pendiente de recibir ...
-
-    rcvchar=Serial1.read();    // lo descargo y ...
-    comms_addcbuff(rcvchar); // lo añado al buffer y ...
+//---------------------- funcion para formato hor:min:seg ----------------------//
+String currentTime(unsigned long temSeg){
+  //temSeg = controlTime.ms()*0.001;
+  if(temSeg > 3599){
+    hor = temSeg / 3600; // horas
+    temMin = temSeg - (hor * 3600);
+    hor0 = String(hor)+":";
+    if (temMin > 59){
+      mint = temMin / 60; //minutos
+      seg = temMin - (mint * 60); //segundos
+      if(seg<10){
+        seg0 = "0"+String(seg);
+      }
+      else{
+        seg0 = String(seg);
+      }
+      if(mint<10){
+        mint0 = "0"+String(mint)+":";
+      }
+      else{
+        mint0 = String(mint)+":";
+      }
+    }
+    else{
+      seg = temMin;
+      if(seg<10){
+        seg0 = "0"+String(seg);
+      }
+      else{
+        seg0 = String(seg);
+      }
+    }
   }
+  else if (temSeg > 59){
+    mint = temSeg / 60; //minutos
+    seg = temSeg - (mint * 60); //segundos
+
+    if (seg<10){
+      seg0 = "0"+ String(seg);
+    }
+    else{
+      seg0 = String(seg);
+    }
+    if(mint<10){
+      mint0 = "0"+String(mint)+":";
+    }
+    else{
+      mint0 = String(mint)+":";
+    }
+    hor0 = "00:";
+  }
+  else if(temSeg < 59){
+    seg = temSeg;
+    if (seg < 10){
+      seg0 = "0"+String(seg);
+    }
+    else{
+      seg0 = String(seg);
+    }
+    mint0 = "00:";
+    hor0 = "00:";
+  }
+
+  return hor0+mint0+seg0;
+  //timehms = hor0+mint0+seg0;
+}
+
+//------------------ Interrupción recepción serie USART ------------------------//
+void serialEvent1(){
+    flagbuff = false;
+    rcvchar=0x00;                // Inicializo carácter recibido
+    while(Serial1.available()){  // Si hay algo pendiente de recibir ...
+      rcvchar=Serial1.read();    // lo descargo y ...
+      comms_addcbuff(rcvchar);   // lo añado al buffer y ...
+    }
 }

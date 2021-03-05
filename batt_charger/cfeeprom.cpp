@@ -3,7 +3,7 @@
 
 void eepromsave(char* tmp){ //comparacion CR1 CR2 enviado
   save=0;
-  for(int i = 0; i<1024;i++){ //13400 por todos los prog.
+  for(int i = 0; i<1024;i++){ //
     if(tmp[i]== 0xFF || tmp[i] == 0){
       break;
     }
@@ -14,6 +14,7 @@ void eepromsave(char* tmp){ //comparacion CR1 CR2 enviado
   }
 }
 
+/*
 void jsonOrigenSave(char* temp){
   Debug.println(temp);
   //DynamicJsonBuffer jsonBuffer(100);
@@ -62,8 +63,8 @@ void jsonOrigenSave(char* temp){
     totalTime = totalAH + totalDuration;
     Debug.println(totalTime);
   }
-}
-
+}*/
+/*
 void jsonSave(char* temp){
 
   Debug.println(temp);
@@ -79,6 +80,20 @@ void jsonSave(char* temp){
   float totalDuration = 0.0;
   float timeAH = 0.0;
   float totalAH = 0.0;
+
+  totalhms = "00:00:00";
+  String sg = "";
+  String mm = "";
+  String hr = "";
+
+  int sg0 = 0;
+  int mm0 = 0;
+  int hr0 = 0;
+
+  float vnew = 0.0;
+  float mmf = 0.0;
+  float hrf = 0.0;
+
   for(int i=0;i<strlen(temp);i++){
     if(temp[i] == 'T' && temp[i+1] == 'y' && temp[i+2] == 'p' && temp[i+3] == 'e'){
       count +=1;
@@ -204,6 +219,225 @@ void jsonSave(char* temp){
   totalTime = totalAH + totalDuration;
   Debug.println(totalTime);
   flagload = true;
+
+  if(totalTime < 3600){ //menor a 1 hora
+    vnew = totalTime / 60.0;
+    hr = "00:";
+    mmf = int(vnew);
+    if (vnew < 10){
+      mm0 = int(vnew);
+      mm = "0"+String(mm0)+":";
+    }
+    else{
+      mm0 = int(vnew);
+      mm = String(mm0)+":";
+    }
+    sg0 = int(((vnew - mmf) * 60.0));
+
+    if (sg0 < 10){
+      sg = "0"+String(sg0);
+    }
+    else{
+      sg = String(sg0);
+    }
+    if(totalTime < 60){ //menor a 1 minuto
+      hr = "00:";
+      mm = "00:";
+      if (totalTime < 10){
+        sg = "0"+String(totalTime);
+      }
+      else{
+        sg = String(totalTime);
+      }
+    }
+  }
+  else{ // mayor a 1 hora
+    vnew = totalTime / 3600.0;
+    hr0 = int(vnew);
+    hrf = int(vnew);
+
+    if(hr0 < 10){
+      hr = "0"+String(hr0)+":";
+    }
+    else{
+      hr = String(hr0)+":";
+    }
+    mmf = int(((vnew - hrf) * 60.0));
+
+    if (mmf < 10){
+      mm0 = int(mmf);
+      mm = "0"+String(mm0)+":";
+    }
+    else{
+      mm0 = int(mmf);
+      mm = String(mm0)+":";
+    }
+    sg0 = int(((mmf - mm0) * 60.0));
+
+    if (sg0 < 10){
+      sg = "0"+ String(sg0);
+    }
+    else{
+      sg = String(sg0);
+    }
+  }
+  totalhms = hr+mm+sg;
+  Debug.println(totalhms);
+}*/
+
+void jsonSave(char* temp){
+
+  Debug.println(temp);
+
+  int count = 0;
+  const char* type0;
+  float time;
+  float current0;
+  float currentAH;
+  float temperature1;
+  float temperature2;
+  totalTime = 0.0;
+  float totalDuration = 0.0;
+  float timeAH = 0.0;
+  float totalAH = 0.0;
+
+  totalhms = "00:00:00";
+  String sg = "";
+  String mm = "";
+  String hr = "";
+
+  int sg0 = 0;
+  int mm0 = 0;
+  int hr0 = 0;
+
+  float vnew = 0.0;
+  float mmf = 0.0;
+  float hrf = 0.0;
+  nameProg = "";
+
+  nameProg = String(temp[0])+String(temp[1])+String(temp[2])+String(temp[3])+String(temp[4]);
+
+  for(int i=0;i<strlen(temp);i++){
+    if(temp[i] == 'T'){
+      count +=1;
+      type0 = "Type";
+  		if(temp[i+4] == 'B')
+        type0 = "Begin";
+  		else if(temp[i+4] == 'P')
+        type0 = "Pause";
+  		else if(temp[i+4] == 'C')
+        type0 = "Charge";
+  		else if(temp[i+4] == 'E')
+        type0 = "End";
+    }
+    else if(temp[i] == 'H' && temp[i+34] == '}'){
+        String x = String(temp[i+7])+String(temp[i+8])+String(temp[i+9])+String(temp[i+10]);
+        time = x.toFloat();
+
+      duration[count-1]=time * 3600.0;
+      totalDuration = totalDuration + duration[count-1];
+    }
+
+    else if(temp[i] == 'C' && temp[i+45] == '}'){
+        String x = String(temp[i+4])+String(temp[i+5])+String(temp[i+6])+String(temp[i+7]);
+        current0 = x.toFloat();
+      current[count-1]=current0;
+    }
+
+    else if(temp[i] == 'A' && temp[i+34] == '}'){
+        String x = String(temp[i+4])+String(temp[i+5])+String(temp[i+6])+String(temp[i+7])+String(temp[i+8])+String(temp[i+9])+String(temp[i+10]);
+        currentAH = x.toFloat();
+      AmperH[count-1]=currentAH;
+      timeAH = AmperH[count-1] / (0.000277 * current[count-1]);
+      totalAH = totalAH + timeAH;
+    }
+
+    else if(temp[i] == 'M' && temp[i+20] == '}'){
+        String x = String(temp[i+4])+String(temp[i+5])+String(temp[i+6])+String(temp[i+7]);
+        temperature1 = x.toFloat();
+      maxtemp[count-1]=temperature1;
+    }
+
+    else if(temp[i] == 'm' && temp[i+9] == '}'){
+        String x = String(temp[i+4])+String(temp[i+5])+String(temp[i+6])+String(temp[i+7]);
+        temperature2 = x.toFloat();
+      mintemp[count-1]=temperature2;
+    }
+
+    if(type0){
+      strlcpy(type[count-1], type0,sizeof(type[count-1]));
+    }
+    else{
+      break;
+    }
+  }
+  totalTime = totalAH + totalDuration;
+  Debug.println(totalTime);
+  flagload = true;
+
+  if(totalTime < 3600){ //menor a 1 hora
+    vnew = totalTime / 60.0;
+    hr = "00:";
+    mmf = int(vnew);
+    if (vnew < 10){
+      mm0 = int(vnew);
+      mm = "0"+String(mm0)+":";
+    }
+    else{
+      mm0 = int(vnew);
+      mm = String(mm0)+":";
+    }
+    sg0 = int(((vnew - mmf) * 60.0));
+
+    if (sg0 < 10){
+      sg = "0"+String(sg0);
+    }
+    else{
+      sg = String(sg0);
+    }
+    if(totalTime < 60){ //menor a 1 minuto
+      hr = "00:";
+      mm = "00:";
+      if (totalTime < 10){
+        sg = "0"+String(totalTime);
+      }
+      else{
+        sg = String(totalTime);
+      }
+    }
+  }
+  else{ // mayor a 1 hora
+    vnew = totalTime / 3600.0;
+    hr0 = int(vnew);
+    hrf = int(vnew);
+
+    if(hr0 < 10){
+      hr = "0"+String(hr0)+":";
+    }
+    else{
+      hr = String(hr0)+":";
+    }
+    mmf = int(((vnew - hrf) * 60.0));
+
+    if (mmf < 10){
+      mm0 = int(mmf);
+      mm = "0"+String(mm0)+":";
+    }
+    else{
+      mm0 = int(mmf);
+      mm = String(mm0)+":";
+    }
+    sg0 = int(((mmf - mm0) * 60.0));
+
+    if (sg0 < 10){
+      sg = "0"+ String(sg0);
+    }
+    else{
+      sg = String(sg0);
+    }
+  }
+  totalhms = hr+mm+sg;
+  Debug.println(totalhms);
 }
 
 char* IDread(){
@@ -235,10 +469,25 @@ void eepromread(){
     eeprom[i] = char(val);
   }
     //Debug.print("read: ");
-    //Debug.println(read);
+    //Debug.println(eeprom);
 
     jsonSave(eeprom);
 }
+
+/*int aux_crc(String val){
+  char bffer[1024] = {0};
+  strcpy(bffer,val.c_str());
+
+  int lenbff = 0;
+  unsigned char tmp_crc[1024]={0};
+  for(int i=0;i<val.length();i++)
+  {
+      tmp_crc[i]=bffer[i];
+      lenbff++;
+  }
+  int dato = crc16_SingleBuf(tmp_crc,lenbff);
+  return dato;
+}*/
 
 void clearProgram(){
   for(int i=0; i< 17;i++){
@@ -254,8 +503,8 @@ void clearProgram(){
   Debug.println("clean");
 }
 
-void cleanEeprom(){
-  for (int i = 0; i <1024 ; ++i) { //1024 1330
+void cleanEeprom(){ // i+=100
+  for (int i = 0; i <1024 ; ++i) { //1024 1330 //1698
     writeEEPROM(disk1,i,0);
   }
 }

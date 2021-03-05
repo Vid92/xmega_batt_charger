@@ -6,10 +6,12 @@ void Control::begin(){
   dac.write(0xFFF);
 }
 
+//----------------------------- Set Current -----------------------------------//
+
 void Control::setCurrent(float val_control){
   this->val_control = val_control;
 }
-
+//------------------------------ Set Time ------------------------------------//
 void Control::setTime(unsigned long timeout){
   this->timeout = timeout * 1000;
   if(this->timeout!=0){
@@ -20,7 +22,7 @@ void Control::setTime(unsigned long timeout){
     }
   }
 }
-
+//------------------------------ Set AmpHour ---------------------------------//
 void Control::setAmpHour(float valAmpHour){
   this->valAmpHour = valAmpHour;
   this->timeAH = this->valAmpHour / (this->val_control * 0.000277); //valor en seg
@@ -31,35 +33,34 @@ void Control::setAmpHour(float valAmpHour){
     }
   }
 }
-
+//---------------------------- Set Temperature --------------------------------//
 void Control::setTemperature(float maxTemp,float minTemp){
   this->maxTemp = maxTemp;
   this->minTemp = minTemp;
 }
 
+//----------------------------- Control-Run ------------------------------------//
 void Control::run() {
   this->state = 1;
-
   digitalWrite(LedRelay, HIGH);
   if((this->prevstate == 0 || this->prevstate == 3 || this->prevstate == 4 || this->prevstate == 1) && this->state == 1){
     stepState = 'R';
     this->flagP = false;
     controlTime.start();
-    //Debug.println("RUN");
+    Debug.println("RUN");
   }
 }
-
+//----------------------------- Control-Pause ---------------------------------//
 void Control::pause() {
   this->state = 2;
   this->flagEnable = true;
-  //Debug.println("PAUSE");
 }
-
+//----------------------------- Control-Stop -----------------------------------//
 void Control::stop() {
   this->state = 3;
   //digitalWrite(LED_BUILTIN, LOW);
 }
-
+//--------------------------- Control Run-Pause --------------------------------//
 void Control::runPause(){
   this->state = 4;
 
@@ -82,15 +83,16 @@ void Control::runPause(){
   }
 }
 
+//------------------------------- Control-StepPause ----------------------------//
 void Control::stepPause(unsigned long steptime){
   this->steptime = steptime * 1000;
 }
-
+//------------------------------ Control-states --------------------------------//
 bool Control::states(){
   return this->flagS;
 }
 
-
+//---------------------------- Control-ReadData --------------------------------//
 void Control::readData(){
   this->averageCurrent = 0;
   this->averageVoltage = 0;
@@ -117,7 +119,7 @@ void Control::readData(){
   valtemp = this->averageTemp * 120.0 / 1023.0;
   delay(1);
 }
-
+//------------------------------ Control-event -----------------------------------//
 void Control::event() {
   //here your logic to control the current
   if(this->state == 1)
@@ -133,7 +135,7 @@ void Control::event() {
                 Debug.print("t2:");
                 Debug.println(this->t2);
               }
-              //--------------- control current -----------------//
+              //------------------------- control current ------------------------//
               if(valcurrent < this->val_control)
               {
                 if (this->valrampa<0xFFF)
@@ -147,7 +149,7 @@ void Control::event() {
               }
               dac.write(0xFFF-this->valrampa);
               delay(1);
-             //---------------- current Warning ------------------//
+             //------------------------- current Warning -------------------------//
              if(controlTime.ms() > this->time1 && controlTime.ms() > this->t2)//toma una muestra cada 1.2s
              {
                 Debug.println("save0");
@@ -182,7 +184,7 @@ void Control::event() {
                  //Debug.print("ElseTime:");
                }
              }
-             //----------------- control temp -------------------//
+             //-------------------------- control temp -----------------------//
              else if(this->maxTemp!=0){
                if(valtemp > this->maxTemp){ //se va a pause
                  this->state = 2; Debug.println("Pause-temp");
@@ -218,7 +220,7 @@ void Control::event() {
                //Debug.print("t2:");
                //Debug.println(this->t2);
              }
-             //-------------- control current ---------------//
+             //---------------------- control current ------------------------//
              if(valcurrent < this->val_control)
              {
                if(this->valrampa<0xFFF)
@@ -233,7 +235,7 @@ void Control::event() {
              dac.write(0xFFF-this->valrampa);
              delay(1);
 
-             //---------------- current Warning ----------------//
+             //---------------------- current Warning ------------------------//
              if(controlTime.ms() > this->time1 && controlTime.ms() > this->t2)
              {
                Debug.print("save1");
@@ -268,7 +270,7 @@ void Control::event() {
                }
              }
 
-             //---------------- control Temp ----------------//
+             //------------------------- control Temp -------------------------//
              if(this->maxTemp!=0){
                if(valtemp > this->maxTemp){ //se va a pause
                  this->state = 2; Debug.println("Pause-temp");
@@ -283,8 +285,8 @@ void Control::event() {
             Debug.println("timeout-agotado");
             this->t1 = 0;
             this->t2 = 0;
-            this->time1 = 30000;
-            this->time2 = 50000;
+            this->time1 = 60000;
+            this->time2 = 90000;
             this->tmpVal = 0;
             this->Ttime0 = Ttime;
             Ttime = this->Ttime0 + (controlTime.ms()*0.001);
@@ -296,6 +298,7 @@ void Control::event() {
       }
   }
 
+//----------------------------------- Step Pause ----------------------------------//
   if(this->state == 4)
   {
     if(controlTime.isRunning())
@@ -311,6 +314,7 @@ void Control::event() {
       delay(1);
   }
 
+//------------------------------------- Stop ---------------------------------------//
   if(this->state == 3)
   {
     if(this->prevstate != 3){
@@ -346,6 +350,7 @@ void Control::event() {
     }
   }
 
+//----------------------------------- Pause ---------------------------------------//
   if(this->state == 2 && this->flagEnable !=false)
   {
     if(this->prevstate!= 2){
@@ -374,6 +379,8 @@ void Control::event() {
     }
   }
 
+  //------------------------------ Temperature good ------------------------------//
+
   if(this->prevstate == 2 &&this->state == 2 && this->flagPause !=true && this->flagP != true){
     if(valtemp <= minTemp){
       this->state = 1;
@@ -382,10 +389,12 @@ void Control::event() {
     }
   }
 
+//------------------------------- Run-play after pause ----------------------------//
   if(this->prevstate == 2 && (this->state == 1 || this->state == 4))
   {
     controlTime.play();
     stepState = 'R';
+    this->t2 = controlTime.ms() + 30000;
     if(this->state==4)digitalWrite(LedRelay, LOW);
     if(this->state==1)digitalWrite(LedRelay, HIGH);
   }

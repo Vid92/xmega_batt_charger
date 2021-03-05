@@ -69,11 +69,11 @@ void Program::process_step()
       break;
 
       case 'E':  //End
-      letter = "End";
+      letter = "Ended";
       Ttime = 0;
       totAH = 0.0;
       control.stop();
-      stepState = 'E';
+      stepState = 'E'; //Ended
       Debug.println("Step-End");
       break;
       default:break;

@@ -9,7 +9,6 @@ extern Control control;
 extern int count;
 extern const char* letter; //char
 
-
 //extern int state0;
 //extern int prevstate0;
 
