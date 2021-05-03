@@ -3,8 +3,8 @@
 #include "Timer.h"
 #include "globals.h"
 
-int disk1 = 0x50;    //Address of 24LC256 eeprom chip
-int disk2 = 0x57;    //Address of 24LC256 eeprom chip extern
+int disk1 = 0x50;    //24LC256 eeprom chip program-default
+int disk2 = 0x57;    //24LC256 eeprom chip Address
 
 unsigned int address = 0;
 
@@ -27,7 +27,6 @@ unsigned long timeC = 0;
 unsigned long timeAc = 0;
 
 int seg = 0;
-
 int mint = 0;
 int temMin = 0;
 int hor = 0;
@@ -48,8 +47,11 @@ Program program;
 
 Timer t;
 Timer to;
-int LedComms = 17;
-int LedRelay = 20;
+int VoltIndi = 16; //C4 indicador cuando no hay voltaje
+int LedComms = 17; //C5 activa o desactiva comm
+int LedRelay = 20; //D0 activa o desactiva relevador
+
+int ledvolt = 0;
 
 char anbu[1024];  //cfg json
 char type[17][10]; //inicio, pausa,carga, fin
@@ -70,12 +72,18 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LedComms, OUTPUT);
   pinMode(LedRelay, OUTPUT);
+  pinMode(VoltIndi, INPUT);
 
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(LedComms, LOW);
   digitalWrite(LedRelay, LOW);
 
+  //Debug.println("hola");
+
   myaddress = readEEPROM(disk2, address);
+
+  //Debug.println("Mundo");
+
   writeEEPROM(disk1, address,myaddress);
 
   clearProgram();
@@ -91,6 +99,13 @@ void loop()
   t.update();
   to.update();
 
+  ledvolt = digitalRead(VoltIndi); // Lee variable de Indicador cuando no hay voltaje
+
+  //if(ledvolt == LOW){
+    //Debug.println("LED_OFF"); //aqui entrara para guardar paso
+    //Debug.print("P:");
+    //Debug.println(count);
+  //}
   control.readData();
   program.process_step();
   control.event();
